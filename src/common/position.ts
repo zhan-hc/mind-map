@@ -54,8 +54,8 @@ class Position {
     // 节点的中心坐标
     const centerY = node.y + (1 / 2) * node.height
     const centerX = node.x +  (1 / 2) * node.width
-    // 获取子节点的区域高度
-    const childNodes = flatNodes.filter(item => item.parentId === node.id)
+    // 获取子节点的区域高度 顺便排序
+    const childNodes = flatNodes.filter(item => item.parentId === node.id).sort((a,b) => a.sort-b.sort)
     const childAreaHeight = areaHeightHandler.getAreaHeight(childNodes)
     // 子节点的起始y坐标
     let startY = centerY - (1 / 2) * childAreaHeight

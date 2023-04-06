@@ -37,17 +37,12 @@ import { iconList } from './constant'
       const newNode = createNode(paper?.checkNode as TreeOption, type)
       flatNodes.push(newNode)
       // 重新对当前节点的sort属性排序
-      tree?.sortNodes(newNode)
+      tree?.sortNodes(newNode, type)
       // 对节点重新计算位置
       position.getNodePosition(flatNodes[0])
       tree?.convertToTree(flatNodes)
       // 重绘
       reDraw(newNode.id)
-      // // 默认选中新节点
-      // if (paper) {
-      //   paper.checkBorder = paper.drawNodeBorder(newNode)
-      //   paper.checkNode = newNode
-      // }
     }
     
   }

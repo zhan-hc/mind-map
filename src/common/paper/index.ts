@@ -2,10 +2,11 @@ import { reactive } from 'vue'
 import Raphael from 'raphael'
 import type { RaphaelPaper, RaphaelElement } from 'raphael';
 import { TreeOption } from '../tree/index'
-import { getNodeInfo } from '../../utils/common'
+import { changeIconDisabled, getNodeInfo } from '../../utils/common'
 import { NodeInfo, NodeType } from '../node/helper'
 import { iconList } from '../../constant'
 import { operateOption, operateType } from '../../utils/type';
+import { NodeOptions } from '../node';
 export class Paper {
   private readonly paper: RaphaelPaper;
   public  checkNode: TreeOption | null; // 当前选中节点
@@ -15,7 +16,6 @@ export class Paper {
     this.paper = new Raphael(wrapDom, wrapDom.clientWidth, wrapDom.clientHeight);
     this.checkNode = null
     this.checkBorder = null
-    // this.lineList = []
   }
 
   // 绘制节点
@@ -28,19 +28,7 @@ export class Paper {
       rect.data('node', node)
       rect.click(function() {
         that.checkNode = reactive(this.data('node'))
-        if (that.checkNode?.id === NodeType.root.toString()) {
-          iconList.forEach(item => {
-            if (item.type !== operateType.addTopic) {
-              item.disabled = false
-            } else {
-              item.disabled = true
-            }
-          })
-        } else {
-          iconList.forEach(item => {
-            item.disabled = false
-          })
-        }
+        changeIconDisabled(that.checkNode as NodeOptions, iconList)
         that.checkBorder && (that.checkBorder.remove())
         that.checkBorder = that.drawNodeBorder(node)
       });
@@ -48,9 +36,7 @@ export class Paper {
       if (node.id === checkNodeId) {
         this.checkBorder = this.drawNodeBorder(node)
         this.checkNode = node
-        iconList.forEach(item => {
-          item.disabled = false
-        })
+        changeIconDisabled(node, iconList)
       }
       if (node.children) this.drawTopic(node.children, checkNodeId)
     }
