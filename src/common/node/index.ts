@@ -1,4 +1,3 @@
-import { NodeType } from './helper'
 import { randomId } from '../../utils/common'
 import { operateType } from '../../utils/type'
 import { flatNodes } from '../../constant';

@@ -13,6 +13,20 @@ export function getNodeInfo (type: NodeInfo, node: NodeOptions) {
   else return NodeInfoList[type].others
 }
 
+// 获取文本宽度
+export function getTextWidth(node: NodeOptions, str = '') {
+  const dom = document.createElement('span');
+  const App = document.getElementById('app')
+  dom.style.display = 'inline-block';
+  dom.style.fontSize = getNodeInfo(NodeInfo.fontSize, node)
+  dom.textContent = str;
+  App?.appendChild(dom);
+  const width = dom.clientWidth;
+  console.log('文本宽度：', width)
+  App?.removeChild(dom);
+  return width;
+}
+
 // 改变操作icon的disabled属性
 export function changeIconDisabled (checkNode: NodeOptions, iconList: operateOption[]) {
   // 如果是根节点不能添加根节点

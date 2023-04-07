@@ -81,7 +81,7 @@ class Position {
       } else {
         // 如果父节点有起始坐标则使用否则用默认坐标
         const startPosition = {
-          x: node.nextStartPosition ? node.nextStartPosition.x : (node.x + item.width),
+          x: node.nextStartPosition ? node.nextStartPosition.x : (node.x + node.width),
           y: node.nextStartPosition ? node.nextStartPosition.y : (centerY)
         }
         // 当前节点的子节点的起始坐标（为了后续递归可调用）

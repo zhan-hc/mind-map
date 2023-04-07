@@ -1,21 +1,18 @@
 <script setup lang="ts">
-import { reactive, watch } from 'vue';
-import { createNode } from './common/node'
-import { flatNodes } from './constant/'
+import { createNode, NodeOptions } from './common/node'
+import { flatNodes, textPadding } from './constant/'
 import { Tree, TreeOption } from './common/tree'
 import { Paper } from './common/paper';
-import position from './common/position'
-import { operateType, operateOption } from './utils/type'
-import { onMounted, watchEffect } from 'vue';
-import useOperate from './hooks/useOperate'
+import { operateType } from './utils/type'
+import { onMounted } from 'vue';
 import operate from './components/operate.vue'
 import Position from './common/position';
-import { NodeType } from './common/node/helper';
 import { iconList } from './constant'
+import { getNodeInfo, getTextWidth } from './utils/common';
+import { NodeInfo } from './common/node/helper';
 
   let tree: Tree | null = null
   let paper: Paper | null = null
-  let show = false
 
   function initPaper () {
     tree = new Tree(flatNodes)
@@ -24,31 +21,54 @@ import { iconList } from './constant'
   }
 
   function reDraw (newNodeId = '') {
+    const position = new Position()
+    // 对节点重新计算位置
+    position.getNodePosition(flatNodes[0])
+    // 重新更改tree数据
+    tree?.convertToTree(flatNodes)
     paper?.clear()
     const lineList = flatNodes.map(item => item.line) as string[]
     paper?.drawLine(lineList)
     tree && paper?.drawTopic(tree.treeNodes, newNodeId)
-    paper?.drawText(flatNodes)
   }
 
   function handleOperate (type: operateType) {
     if ([operateType.addTopic, operateType.addSubTopic].includes(type)) {
-      const position = new Position()
       const newNode = createNode(paper?.checkNode as TreeOption, type)
       flatNodes.push(newNode)
       // 重新对当前节点的sort属性排序
       tree?.sortNodes(newNode, type)
-      // 对节点重新计算位置
-      position.getNodePosition(flatNodes[0])
-      tree?.convertToTree(flatNodes)
       // 重绘
       reDraw(newNode.id)
+    } else if (type === operateType.editTopic) {
+      const curNodeDom = document.querySelector('.node-edit-wrap');
+      const NodeTextDom = document.querySelector('.node-text');
+      (curNodeDom as HTMLElement).style.top = `${(paper?.checkNode as TreeOption).y * 1 + 15}px`;
+      (curNodeDom as HTMLElement).style.left = `${(paper?.checkNode as TreeOption).x * 1 + 15}px`;
+      (curNodeDom as HTMLElement).style.height = getNodeInfo(NodeInfo.fontSize, paper?.checkNode as TreeOption);
+      (curNodeDom as HTMLElement).style.display = 'block';
+      (NodeTextDom as HTMLElement).innerText = (paper?.checkNode as TreeOption).text;
+      (NodeTextDom as HTMLElement).focus()
     }
-    
+  }
+
+  function addEditToBlur () {
+    const curNodeDom = document.querySelector('.node-edit-wrap')
+    const NodeTextDom = document.querySelector('.node-text');
+    (NodeTextDom as HTMLElement).addEventListener('blur',function(e){
+      const target = e.target as HTMLElement
+      (curNodeDom as HTMLElement).style.display = 'none';
+      const editNode = flatNodes.find(item => item.id === (paper?.checkNode as TreeOption).id);
+      (editNode as NodeOptions).width = getTextWidth((paper?.checkNode as TreeOption), target.innerText) + textPadding * 2;
+      (editNode as NodeOptions).text = target.innerText
+      console.log(flatNodes, 'flatNodesflatNodes')
+      reDraw()
+    })
   }
 
   onMounted(() => {
     initPaper()
+    addEditToBlur()
   })
 
 
@@ -56,8 +76,27 @@ import { iconList } from './constant'
 
 <template>
   <operate @operate="handleOperate" :iconList="iconList"/>
-  <div id="paper" style="width:100vh;height:100vh;"></div>
+  <div id="paper" style="width:100vw;height:100vh;">
+    <div class="node-edit-wrap">
+      <div class="node-text" contenteditable="true">zzzzzz</div>
+    </div>
+  </div>
 </template>
 
 <style scoped>
+.node-edit-wrap {
+  display: none;
+  position: absolute;
+  top: 1500px;
+  left: 100px;
+  max-width: 200px;
+  background-color: #fff;
+}
+.node-text {
+  padding: 5px 10px;
+  font-size: 16px;
+  background-color: #fff;
+  /* width: 200px;
+  height: 100px; */
+}
 </style>

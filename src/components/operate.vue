@@ -22,7 +22,9 @@ function handleOperate (item: operateOption): void {
 
 <template>
   <div class="wrap">
-    <div v-for="(item, i) in iconList" :key="i" class="operate-item" :class="[item.icon, item.disabled ? 'disabled' : '']" @click="handleOperate(item)"></div>
+    <div v-for="(item, i) in iconList" :key="i" class="operate-item" :class="[item.icon, item.disabled ? 'disabled' : '']" @click="handleOperate(item)">
+      <div class="tip">你好</div>
+    </div>
   </div>
   
 </template>
@@ -57,11 +59,4 @@ function handleOperate (item: operateOption): void {
   opacity: .3;
   cursor: default !important;
 }
-/* .tip {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100px;
-  height: 50px;
-} */
 </style>

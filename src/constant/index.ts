@@ -3,6 +3,7 @@ import { operateType, operateOption } from '../utils/type'
 import { reactive } from 'vue'
 export const moduleInterval = 50 // 模块左右间隔
 export const modulePadding = 25 // 模块上下间隔
+export const textPadding = 10 // 文本左右边距
 
 export const flatNodes : NodeOptions[] = [
   {

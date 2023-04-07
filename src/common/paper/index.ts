@@ -3,9 +3,8 @@ import Raphael from 'raphael'
 import type { RaphaelPaper, RaphaelElement } from 'raphael';
 import { TreeOption } from '../tree/index'
 import { changeIconDisabled, getNodeInfo } from '../../utils/common'
-import { NodeInfo, NodeType } from '../node/helper'
+import { NodeInfo } from '../node/helper'
 import { iconList } from '../../constant'
-import { operateOption, operateType } from '../../utils/type';
 import { NodeOptions } from '../node';
 export class Paper {
   private readonly paper: RaphaelPaper;
@@ -20,19 +19,13 @@ export class Paper {
 
   // 绘制节点
   public drawTopic (treeNode:TreeOption[], checkNodeId: string) {
-    const that = this
     for (let node of treeNode) {
-      const rect = this.paper.rect(node.x, node.y, node.width, node.height, 5);
-      const fillColor = getNodeInfo(NodeInfo.fillColor, node)
-      rect.attr({ 'fill': fillColor, 'stroke-width': 0 })
-      rect.data('node', node)
-      rect.click(function() {
-        that.checkNode = reactive(this.data('node'))
-        changeIconDisabled(that.checkNode as NodeOptions, iconList)
-        that.checkBorder && (that.checkBorder.remove())
-        that.checkBorder = that.drawNodeBorder(node)
-      });
-      // 如果是新增节点
+      const st = this.paper.set()
+      const rect = this.drawRect(node) // 底层节点
+      const text = this.drawText(node) // 文本
+      const wrapRect = this.drawClickRect(node) // 顶层节点
+      st.push(rect, text, wrapRect)
+      // 如果是新增节点默认选中新节点
       if (node.id === checkNodeId) {
         this.checkBorder = this.drawNodeBorder(node)
         this.checkNode = node
@@ -47,14 +40,13 @@ export class Paper {
     lineList.forEach(item => {
       const line = this.paper.path(item)
         line.attr({
-          "stroke-width": 2
+          'stroke-width': 2
         })
     });
   }
 
   // 绘制文本
-  public drawText (flatNodes: TreeOption[]) {
-    flatNodes.forEach(node => {
+  public drawText (node: TreeOption) {
       // 节点的中心位置
       const centerPosition = {
         x: node.x + (1 / 2) * node.width,
@@ -65,10 +57,7 @@ export class Paper {
         'font-size': getNodeInfo(NodeInfo.fontSize, node),
         'fill': getNodeInfo(NodeInfo.fontColor, node)
       })
-      const textNode = text.node as HTMLElement
-      textNode.style.userSelect =  'none'
-      // text.node.id = item.id
-    })
+      return text
   }
 
   // 绘制边框
@@ -76,9 +65,35 @@ export class Paper {
     const padding = 4
     const rect = this.paper.rect(node.x - padding, node.y - padding, node.width + padding * 2, node.height + padding * 2, 5);
     rect.attr({
-      "stroke-width": 2,
+      'stroke-width': 2,
       'stroke': '#3498db'
     })
+    return rect
+  }
+  // 绘制底层的节点块
+  public drawRect (node: TreeOption) {
+    const rect = this.paper.rect(node.x, node.y, node.width, node.height, 5);
+    const fillColor = getNodeInfo(NodeInfo.fillColor, node)
+    rect.attr({ 'fill': fillColor, 'stroke-width': 0 })
+    return rect
+  }
+
+  // 绘制最上层可点击的节点块
+  public drawClickRect (node: TreeOption) {
+    const that = this
+    const padding = 4
+    const rect =  this.paper.rect(node.x - padding, node.y - padding, node.width + padding * 2, node.height + padding * 2, 5);
+    rect.attr({'stroke-width': 0, fill: 'transparent' })
+    rect.data('node', node)
+    rect.click(function() {
+      that.checkNode = reactive(this.data('node'))
+      // 更新操作栏的图标状态
+      changeIconDisabled(that.checkNode as NodeOptions, iconList)
+      // 选中当前节点
+      that.checkBorder && (that.checkBorder.remove())
+      that.checkBorder = that.drawNodeBorder(node)
+    });
+    rect.hover(function(){this.attr({'stroke-width': 2, 'stroke': '#87ceeb'})}, function(){this.attr({'stroke-width': 0})})
     return rect
   }
 
