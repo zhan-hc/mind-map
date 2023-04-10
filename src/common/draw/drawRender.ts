@@ -27,7 +27,7 @@ export class DrawRender {
       const text = this.drawGenerator.drawText(getNodeCenterPosition(node), node.text, getNodeTextAttr(node) as RaphaelReadAttributes) // 文本      
       const wrapRect = this.drawWrapRect(node)
       st.push(rect, text, wrapRect)
-      // 如果是新增节点默认选中新节点
+      // 如果是新增节点则默认选中新节点
       if (node.id === checkNodeId) {
         this.checkBorder = this.drawCheckRect(node)
         this.checkNode = node

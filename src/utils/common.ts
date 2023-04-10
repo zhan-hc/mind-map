@@ -2,6 +2,7 @@ import { NodeOptions } from '../common/node'
 import { NodeType, NodeInfo, NodeInfoList } from '../common/node/helper'
 import { positionOption } from '../common/position'
 import { TreeOption } from '../common/tree'
+import { flatNodes } from '../constant'
 import { operateOption, operateType } from './type'
 
 // 获取矩形节点的信息
@@ -57,6 +58,19 @@ export function setNodeRectAttr (strokeWidth: number, stroke: string) {
     'stroke': stroke
   }
 }
+
+// 对当前节点的sort字段进行更正
+export function sortNodes(newNode: NodeOptions, type: operateType) {
+  const targetId = type === operateType.addTopic ? newNode.parentId : newNode.id
+  const brotherNodes = flatNodes.filter((item) => item.parentId === targetId)
+  brotherNodes.forEach(item => {
+    if (item.id !== newNode.id && item.sort >= newNode.sort) {
+      item.sort = item.sort + 1
+    }
+  })
+}
+
+
 // 生成随机id
 export function randomId() {
   return (Math.random() + new Date().getTime()).toString(32).slice(0,8)

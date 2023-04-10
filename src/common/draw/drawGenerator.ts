@@ -35,19 +35,13 @@ class DrawGenerator {
     }
   
     // 绘制底层的节点块
-    public drawRect (rectOption: rectOption, attr?: RaphaelReadAttributes, data?: rectData, clickFun?: any, hoverFun?: any, leaveFunction?: any) {
+    public drawRect (rectOption: rectOption, attr?: RaphaelReadAttributes, data?: rectData) {
       const rect = this.paper.rect(rectOption.x, rectOption.y, rectOption.width, rectOption.height, rectOption.radius);
       if (attr) {
         rect.attr(attr)
       }
       if (data) {
         rect.data(data.key, data.value)
-      }
-      if (clickFun) {
-        rect.click(clickFun())
-      }
-      if (hoverFun && leaveFunction) {
-        rect.hover(hoverFun, leaveFunction)
       }
       return rect
     }

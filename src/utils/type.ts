@@ -5,6 +5,12 @@ export enum operateType {
   delTopic
 }
 
+export enum operateTotalType {
+  add,
+  edit,
+  del
+}
+
 export interface operateOption {
   icon: string,
   disabled: boolean,
