@@ -1,7 +1,7 @@
 import { randomId } from '../../utils/common'
 import { operateType } from '../../utils/type'
 import { flatNodes } from '../../constant';
-import { PositionOption } from '../position'
+import { positionOption } from '../position'
 export interface NodeOptions {
   id: string;
   text: string;
@@ -12,7 +12,7 @@ export interface NodeOptions {
   height: number,
   sort: number,
   line?: string,
-  nextStartPosition? : PositionOption
+  nextStartPosition? : positionOption
 }
 
 export function createNode (checkNode: NodeOptions, type: operateType)  {

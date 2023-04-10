@@ -2,9 +2,9 @@ import { TreeOption } from './tree';
 import { NodeOptions } from './node';
 import { NodeType } from './node/helper';
 import { flatNodes, moduleInterval, modulePadding } from '../constant/index'
-import DrawGenerator from './drawGenerator'
+import DrawGenerator from './draw/drawGenerator'
 
-export interface PositionOption {
+export interface positionOption {
   x: number,
   y: number
 }
@@ -37,19 +37,16 @@ class AreaHeight {
     })
     return areaHeight
   }
-
-  public getChildrenAreaHeight(parentNode: NodeOptions, childNodes: NodeOptions) {}
 }
 
 class Position {
-  // private treeNodes: TreeOption[] | null;
-  public constructor() {
-    // this.treeNodes = treeNodes === undefined ? null : treeNodes;
+  private drawGenerator: DrawGenerator;
+  public constructor(drawGenerator: DrawGenerator) {
+    this.drawGenerator = drawGenerator;
   }
 
   public getNodePosition (node: NodeOptions) {
     const areaHeightHandler = new AreaHeight();
-    const drawGenerator = new DrawGenerator();
     const itemX = node.x + moduleInterval + node.width
     // 节点的中心坐标
     const centerY = node.y + (1 / 2) * node.height
@@ -77,7 +74,7 @@ class Position {
           x: item.x +  (1 / 2) * item.width ,
           y: item.y + (1 / 2) * item.height
         }
-        item.line = drawGenerator.drawFirstLine(startPosition, endPosition)
+        item.line = this.drawGenerator.drawFirstLine(startPosition, endPosition)
       } else {
         // 如果父节点有起始坐标则使用否则用默认坐标
         const startPosition = {
@@ -95,7 +92,7 @@ class Position {
           rightBotX: item.nextStartPosition.x,
           rightBotY: item.nextStartPosition.y
         }
-        item.line = drawGenerator.drawChildLine(startPosition, endPosition)
+        item.line = this.drawGenerator.drawChildLine(startPosition, endPosition)
       }
       // 遍历子节点
       const childrenNodes =  flatNodes.filter(node => node.parentId === item.id)

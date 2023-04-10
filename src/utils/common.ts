@@ -1,6 +1,62 @@
 import { NodeOptions } from '../common/node'
 import { NodeType, NodeInfo, NodeInfoList } from '../common/node/helper'
+import { positionOption } from '../common/position'
+import { TreeOption } from '../common/tree'
 import { operateOption, operateType } from './type'
+
+// 获取矩形节点的信息
+export function getNodeRectInfo (node: TreeOption, radius: number) {
+  return {
+    x: node.x,
+    y: node.y,
+    width: node.width,
+    height: node.height,
+    radius
+  }
+}
+
+// 获取节点边框信息
+export function getNodeRectBorder (node: TreeOption,  radius: number, padding: number = 0) {
+  return {
+    x: node.x - padding,
+    y: node.y - padding,
+    width: node.width + padding * 2,
+    height: node.height + padding * 2,
+    radius
+  }
+}
+
+// 获取节点的中心位置
+export function getNodeCenterPosition (node: TreeOption): positionOption {
+  return {
+    x: node.x + (1 / 2) * node.width,
+    y: node.y + (1 / 2) * node.height
+  }
+}
+
+// 获取节点矩形的属性 0/1 = 默认矩形/外层可点击矩形
+export function getNodeRectAttr (node: TreeOption, type: 0|1) {
+  return {
+    fill: type ? 'transparent' : getNodeInfo(NodeInfo.fillColor, node),
+    'stroke-width': 0
+  }
+}
+
+// 获取节点文本的属性
+export function getNodeTextAttr (node: TreeOption) {
+  return {
+    'font-size': getNodeInfo(NodeInfo.fontSize, node),
+    fill: getNodeInfo(NodeInfo.fontColor, node)
+  }
+}
+
+// 获取节点文本的属性
+export function setNodeRectAttr (strokeWidth: number, stroke: string) {
+  return {
+    'stroke-width': strokeWidth,
+    'stroke': stroke
+  }
+}
 // 生成随机id
 export function randomId() {
   return (Math.random() + new Date().getTime()).toString(32).slice(0,8)
