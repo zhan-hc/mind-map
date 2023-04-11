@@ -16,9 +16,9 @@ export enum NodeFillColor {
 }
 
 export enum NodeFontColor {
-  first = '#fff',
-  second = '#000',
-  others = '#000'
+  first = '#ffffff',
+  second = '#000000',
+  others = '#000000'
 }
 
 export enum createType {
@@ -29,7 +29,8 @@ export enum createType {
 export enum NodeInfo {
   fillColor,
   fontSize,
-  fontColor
+  fontColor,
+  NodeTextPadding
 }
 
 export const NodeInfoList = [NodeFillColor, NodeFontSize, NodeFontColor] 

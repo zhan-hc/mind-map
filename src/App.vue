@@ -5,16 +5,23 @@ import operate from './components/operate.vue'
 import { iconList } from './constant'
 import useOperate from './hooks/useOperate';
 import useDraw from './hooks/useDraw';
+import { flatNodes } from './constant'
+import { TreeOption } from './common/tree';
 
   const callbackObject: any = {}
 
   const { handleOperate, addEditToBlur } = useOperate()
-  const { drawRender, reDraw } = useDraw()
+  const { tree, drawRender, reDraw } = useDraw()
 
   // 节点操作点击事件
   function handleOperateFunc (type: operateType) {
-    callbackObject[operateTotalType.add] = (id: string) => {
+    callbackObject[operateTotalType.ADD] = (id: string) => {
       reDraw(id)
+    }
+    callbackObject[operateTotalType.DELETE] = () => {
+      const checkNode = drawRender?.value?.checkNode as TreeOption
+      tree.value?.deleteNodeLists(flatNodes, tree.value?.getFlatNodeIds(checkNode))
+      reDraw()
     }
     handleOperate(drawRender, type, callbackObject)
   }
@@ -35,7 +42,7 @@ import useDraw from './hooks/useDraw';
   <operate @operate="handleOperateFunc" :iconList="iconList"/>
   <div id="paper" style="width:100vw;height:100vh;">
     <div class="node-edit-wrap">
-      <div class="node-text" contenteditable="true">zzzzzz</div>
+      <div class="node-text" contenteditable="true"></div>
     </div>
   </div>
 </template>

@@ -78,9 +78,14 @@ export function randomId() {
 
 // 获取节点相关信息
 export function getNodeInfo (type: NodeInfo, node: NodeOptions) {
-  if (node.id === NodeType.root.toString()) return NodeInfoList[type].first
-  else if (node.parentId === NodeType.root.toString()) return NodeInfoList[type].second
-  else return NodeInfoList[type].others
+  return NodeInfoList[type][getNodeLevel(node)]
+}
+
+// 获取节点层级
+export function getNodeLevel (node: NodeOptions) {
+  if (node.id === NodeType.root.toString()) return 'first'
+  else if (node.parentId === NodeType.root.toString()) return 'second'
+  else return 'others'
 }
 
 // 获取文本宽度
@@ -99,10 +104,10 @@ export function getTextWidth(node: NodeOptions, str = '') {
 
 // 改变操作icon的disabled属性
 export function changeIconDisabled (checkNode: NodeOptions, iconList: operateOption[]) {
-  // 如果是根节点不能添加根节点
+  // 如果是根节点不能添加兄弟节点和删除节点
   if (checkNode.id === NodeType.root.toString()) {
     iconList.forEach(item => {
-      if (item.type !== operateType.addTopic) {
+      if (![operateType.addTopic, operateType.delTopic].includes(item.type)) {
         item.disabled = false
       } else {
         item.disabled = true

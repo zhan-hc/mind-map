@@ -6,9 +6,9 @@ export enum operateType {
 }
 
 export enum operateTotalType {
-  add,
-  edit,
-  del
+  ADD,
+  EDIT,
+  DELETE
 }
 
 export interface operateOption {

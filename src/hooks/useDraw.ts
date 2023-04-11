@@ -33,9 +33,9 @@ export default function () {
     // 对节点重新计算位置
     position.getNodePosition(flatNodes[0])
     // 重新更改tree数据
-    data.tree?.convertToTree(flatNodes)
+    data.tree?.arrayToTree(flatNodes)
     data.paper?.clear()
-    const lineList = flatNodes.map(item => item.line)
+    const lineList = flatNodes.filter(item => item.parentId !== null).map(item => item.line)
     data.drawRender?.drawTopicLine(lineList as string[])
     data.tree && data.drawRender?.drawTopic(data.tree.treeNodes, newNodeId)
   }

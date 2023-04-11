@@ -1,7 +1,7 @@
 <script setup lang="ts">
 // @unocss-include
 import { toRefs } from 'vue'
-import { operateType, operateOption } from '../utils/type'
+import { operateOption } from '../utils/type'
 
 const props = defineProps({
   iconList: {
@@ -23,7 +23,6 @@ function handleOperate (item: operateOption): void {
 <template>
   <div class="wrap">
     <div v-for="(item, i) in iconList" :key="i" class="operate-item" :class="[item.icon, item.disabled ? 'disabled' : '']" @click="handleOperate(item)">
-      <div class="tip">你好</div>
     </div>
   </div>
   

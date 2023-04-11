@@ -84,6 +84,10 @@ export class DrawRender {
     return containerDom
   }
 
+  public getCheckNode () {
+    return this.checkNode
+  }
+
   
 
   public clear(): void {
