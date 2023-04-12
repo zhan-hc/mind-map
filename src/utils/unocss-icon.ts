@@ -1,2 +1,2 @@
 // @unocss-include
-export const iconList = ['i-ant-design-plus-circle-filled', 'i-ant-design-plus-circle-outlined', 'i-ant-design-edit-filled', 'i-ant-design-delete-filled'];
+export const operateIcons = ['i-ant-design-plus-circle-filled', 'i-ant-design-plus-square-filled', 'i-ant-design-edit-filled', 'i-ant-design-delete-filled'];

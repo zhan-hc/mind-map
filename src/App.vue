@@ -2,11 +2,11 @@
 import { operateTotalType, operateType } from './utils/type'
 import { onMounted } from 'vue';
 import operate from './components/operate.vue'
-import { iconList } from './constant'
 import useOperate from './hooks/useOperate';
 import useDraw from './hooks/useDraw';
-import { flatNodes } from './constant'
+import { flatNodes, iconList } from './constant'
 import { TreeOption } from './common/tree';
+import { deleteNodeLists, getFlatNodeIds } from './utils/nodeUtils';
 
   const callbackObject: any = {}
 
@@ -20,7 +20,7 @@ import { TreeOption } from './common/tree';
     }
     callbackObject[operateTotalType.DELETE] = () => {
       const checkNode = drawRender?.value?.checkNode as TreeOption
-      tree.value?.deleteNodeLists(flatNodes, tree.value?.getFlatNodeIds(checkNode))
+      deleteNodeLists(flatNodes, getFlatNodeIds(checkNode))
       reDraw()
     }
     handleOperate(drawRender, type, callbackObject)

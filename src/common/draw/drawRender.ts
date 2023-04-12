@@ -1,11 +1,13 @@
 import { reactive } from 'vue'
 import type { RaphaelPaper, RaphaelElement, RaphaelReadAttributes } from 'raphael';
 import { TreeOption } from '../tree/index'
-import { changeIconDisabled, getNodeCenterPosition,  getNodeRectAttr, getNodeRectBorder, getNodeRectInfo, getNodeTextAttr, setNodeRectAttr } from '../../utils/common'
+import { changeIconDisabled } from '../../utils/common'
+import { getNodeCenterPosition,  getNodeIconPosition,  getNodeRectAttr, getNodeRectBorder, getNodeRectInfo, getNodeTextAttr, setNodeRectAttr } from '../../utils/nodeUtils'
 import { iconList } from '../../constant'
 import { NodeOptions } from '../node';
 import { Paper } from '../paper';
 import DrawGenerator from './drawGenerator';
+import { DRAW_CALLBACK_TYPE } from './type';
 export class DrawRender {
   private readonly paper: RaphaelPaper;
   private readonly drawGenerator: DrawGenerator;
@@ -19,21 +21,42 @@ export class DrawRender {
   }
 
   // 绘制节点
-  public drawTopic (treeNode:TreeOption[], checkNodeId: string) {
-    const that = this
+  public drawTopic (treeNode:TreeOption[], checkNodeId: string, callback?: any) {
     for (let node of treeNode) {
       const st = this.paper.set()
       const rect = this.drawGenerator.drawRect(getNodeRectInfo(node, 5), getNodeRectAttr(node, 0) as RaphaelReadAttributes) // 底层节点
-      const text = this.drawGenerator.drawText(getNodeCenterPosition(node), node.text, getNodeTextAttr(node) as RaphaelReadAttributes) // 文本      
+      const text = this.drawGenerator.drawText(getNodeCenterPosition(node), node.text, getNodeTextAttr(node) as RaphaelReadAttributes) // 文本
       const wrapRect = this.drawWrapRect(node)
       st.push(rect, text, wrapRect)
+
+      if (node.line) {
+        const line = this.drawGenerator.drawLine(node.line, {'stroke-width': 2} as RaphaelReadAttributes)
+        line.toBack()
+      }
+
       // 如果是新增节点则默认选中新节点
       if (node.id === checkNodeId) {
         this.checkBorder = this.drawCheckRect(node)
         this.checkNode = node
         changeIconDisabled(node, iconList)
       }
-      if (node.children) this.drawTopic(node.children, checkNodeId)
+
+      if (node.children && node.children.length) {
+        // 绘制展开按钮
+        const data = {
+          key: 'node',
+          value: node
+        }
+        const expandIcon = this.drawGenerator.drawExpandIcon(getNodeIconPosition(node), data, !node.expand)
+        expandIcon.click(function () {
+          const nodeData = this.data(data.key)
+          if (callback[DRAW_CALLBACK_TYPE.EXPAND]) {
+            callback[DRAW_CALLBACK_TYPE.EXPAND](nodeData)
+          }
+        })
+        // 如果子节点展开
+        if (node.expand) this.drawTopic(node.children, checkNodeId, callback)
+      }
     }
   }
 
@@ -63,14 +86,6 @@ export class DrawRender {
     wrapRect.hover(function(){wrapRect.attr(setNodeRectAttr( 2, '#87ceeb'))}, function(){wrapRect.attr({'stroke-width': 0})})
     
     return wrapRect
-  }
-
-  // 绘制线
-  public drawTopicLine (lineList: string[]) {
-    const that = this
-    lineList.forEach(item => {
-      that.drawGenerator.drawLine(item, {'stroke-width': 2} as RaphaelReadAttributes)
-    });
   }
 
   public getPaperElement (container: string | Element) : HTMLElement {

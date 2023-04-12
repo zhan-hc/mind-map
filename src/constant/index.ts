@@ -1,5 +1,6 @@
 import { NodeOptions } from '../common/node'
 import { operateType, operateOption } from '../utils/type'
+import { operateIcons } from '../utils/unocss-icon'
 import { reactive } from 'vue'
 export const moduleInterval = 50 // 模块左右间隔
 export const modulePadding = 25 // 模块上下间隔
@@ -8,22 +9,22 @@ export const textPadding = 10 // 文本左右边距
 
 export const iconList: operateOption[] = reactive([
   {
-    icon: 'i-ant-design-plus-circle-filled',
+    icon: operateIcons[0],
     disabled: true,
     type: operateType.addTopic
   },
   {
-    icon: 'i-ant-design-plus-circle-outlined',
+    icon: operateIcons[1],
     disabled: true,
     type: operateType.addSubTopic
   },
   {
-    icon: 'i-ant-design-edit-filled',
+    icon: operateIcons[2],
     disabled: true,
     type: operateType.editTopic
   },
   {
-    icon: 'i-ant-design-delete-filled',
+    icon: operateIcons[3],
     disabled: true,
     type: operateType.delTopic
   }
@@ -53,7 +54,8 @@ export const flatNodes : NodeOptions[] = [
     parentId: null,
     width: NodeWidthHeight.first.width,
     height: NodeWidthHeight.first.height,
-    sort: 0
+    sort: 0,
+    expand: true
   }
 ]
 

@@ -1,4 +1,5 @@
-import { getNodeLevel, randomId } from '../../utils/common'
+import { randomId } from '../../utils/common'
+import { getNodeLevel } from '../../utils/nodeUtils'
 import { operateType } from '../../utils/type'
 import { NodeWidthHeight, flatNodes } from '../../constant';
 import { positionOption } from '../position'
@@ -12,7 +13,8 @@ export interface NodeOptions {
   height: number,
   sort: number,
   line?: string,
-  nextStartPosition? : positionOption
+  nextStartPosition? : positionOption,
+  expand: boolean
 }
 
 export function createNode (checkNode: NodeOptions, type: operateType)  {
@@ -24,7 +26,8 @@ export function createNode (checkNode: NodeOptions, type: operateType)  {
     y: 0,
     width: 0,
     height: 0,
-    sort: type === operateType.addTopic ? (checkNode.sort + 1) : flatNodes.filter(item => item.parentId === checkNode.id).length
+    sort: type === operateType.addTopic ? (checkNode.sort + 1) : flatNodes.filter(item => item.parentId === checkNode.id).length,
+    expand: true
   }
 
   newNode.width = NodeWidthHeight[getNodeLevel(newNode)].width

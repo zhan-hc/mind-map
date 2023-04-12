@@ -6,6 +6,11 @@ export interface rectOption extends positionOption {
   height: number,
   radius?: number
 }
+export interface circleOption extends positionOption {
+  x: number,
+  y: number,
+  radius: number
+}
 
 interface rectData {
   key: string,
@@ -16,35 +21,69 @@ class DrawGenerator {
   public constructor(paper: RaphaelPaper) {
     this.paper = paper
   }
-    // 绘制线
-    public drawLine (linePath: string, attr?: RaphaelReadAttributes) {
-      const line = this.paper.path(linePath)
-      if (attr) {
-        line.attr(attr)
-      }
+  // 绘制线
+  public drawLine (linePath: string, attr?: RaphaelReadAttributes) {
+    const line = this.paper.path(linePath)
+    if (attr) {
+      line.attr(attr)
     }
-  
-    // 绘制文本
-    public drawText (position: positionOption, text: string, attr?: RaphaelReadAttributes) {
-      const paperText = this.paper.text(position.x, position.y, text)
-      if (attr) {
-        paperText.attr(attr)
-      }
-      
-      return paperText
+    return line
+  }
+
+  // 绘制文本
+  public drawText (position: positionOption, text: string, attr?: RaphaelReadAttributes) {
+    const paperText = this.paper.text(position.x, position.y, text)
+    if (attr) {
+      paperText.attr(attr)
     }
-  
-    // 绘制底层的节点块
-    public drawRect (rectOption: rectOption, attr?: RaphaelReadAttributes, data?: rectData) {
-      const rect = this.paper.rect(rectOption.x, rectOption.y, rectOption.width, rectOption.height, rectOption.radius);
-      if (attr) {
-        rect.attr(attr)
-      }
-      if (data) {
-        rect.data(data.key, data.value)
-      }
-      return rect
+    
+    return paperText
+  }
+
+  // 绘制圆
+  public drawCircle (position: circleOption, attr?: RaphaelReadAttributes) {
+    const circle = this.paper.circle(position.x, position.y, position.radius)
+    if (attr) {
+      circle.attr(attr)
     }
+    
+    return circle
+  }
+
+  // 绘制图标(展开和收藏图标)1+/0-
+  public drawExpandIcon (position: circleOption,data?: rectData, type?: boolean) {
+    const st = this.paper.set()
+    const circle = this.drawCircle(position, {'stroke': '#262626', 'stroke-width': 2, 'fill': '#ccc'} as RaphaelReadAttributes)
+    const horizontalLine = this.drawLine(`M${position.x - (position.radius / 2)} ${position.y}L${position.x + (position.radius / 2)} ${position.y}Z`)
+    
+    if (type) {
+      const verticalLine = this.drawLine(`M${position.x} ${position.y - (position.radius / 2)}L${position.x} ${position.y + (position.radius / 2)}Z`)
+      st.push(circle, horizontalLine, verticalLine)
+    }
+    else{
+      st.push(circle, horizontalLine)
+    }
+
+    if (data) {
+      st.data(data.key, data.value)
+    }
+
+    st.attr({opacity: 0})
+    st.hover(function(){st.attr({opacity: 1})}, function(){st.attr({opacity: 0})})
+    return st
+  }
+
+  // 绘制底层的节点块
+  public drawRect (rectOption: rectOption, attr?: RaphaelReadAttributes, data?: rectData) {
+    const rect = this.paper.rect(rectOption.x, rectOption.y, rectOption.width, rectOption.height, rectOption.radius);
+    if (attr) {
+      rect.attr(attr)
+    }
+    if (data) {
+      rect.data(data.key, data.value)
+    }
+    return rect
+  }
   
 
   // 绘制第一层的模块连接线（贝塞尔曲线）
@@ -67,9 +106,9 @@ class DrawGenerator {
 
   // 绘制除第一层节点之后的连接线 
   public drawChildLine (startPosition: positionOption, endPosition: connectPositionOption): string {
-    const connectPathStr = this.createConnectPathStr(startPosition.x + 15, startPosition.y, endPosition.leftBotX,  endPosition.leftBotY);
+    const connectPathStr = this.createConnectPathStr(startPosition.x + 15, startPosition.y, endPosition.leftX,  endPosition.leftY);
     let pathStr = `M${startPosition.x} ${startPosition.y} L${startPosition.x + 15} ${startPosition.y} ${connectPathStr}`;
-    pathStr += ` M ${ endPosition.leftBotX} ${ endPosition.leftBotY} L${endPosition.rightBotX} ${endPosition.rightBotY}`;
+    pathStr += ` M ${ endPosition.leftX} ${ endPosition.leftY} L${endPosition.rightX} ${endPosition.rightY}`;
 
     return pathStr
   }

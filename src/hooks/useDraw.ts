@@ -3,9 +3,9 @@ import DrawGenerator from "../common/draw/drawGenerator"
 import { DrawRender } from "../common/draw/drawRender"
 import { Paper } from "../common/paper"
 import Position from "../common/position"
-import Tree from "../common/tree"
+import Tree, { TreeOption } from "../common/tree"
 import { flatNodes } from "../constant"
-import type { RaphaelPaper } from 'raphael';
+import { changeNodeExpand } from '../utils/nodeUtils'
 
 interface dataOption {
   tree:  Tree | null,
@@ -35,9 +35,14 @@ export default function () {
     // 重新更改tree数据
     data.tree?.arrayToTree(flatNodes)
     data.paper?.clear()
-    const lineList = flatNodes.filter(item => item.parentId !== null).map(item => item.line)
-    data.drawRender?.drawTopicLine(lineList as string[])
-    data.tree && data.drawRender?.drawTopic(data.tree.treeNodes, newNodeId)
+    // 展开按钮的回调
+    const callbackObj = {
+      expand: function (node: TreeOption) {
+        changeNodeExpand(flatNodes, node.id)
+        reDraw()
+      }
+    }
+    data.tree && data.drawRender?.drawTopic(data.tree.treeNodes, newNodeId, callbackObj)
   }
 
   onMounted(() => {

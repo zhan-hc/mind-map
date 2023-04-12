@@ -4,7 +4,8 @@ import { iconList, flatNodes, textPadding, NodeTextPadding } from '../constant'
 import { createNode, NodeOptions } from '../common/node'
 import { DrawRender } from '../common/draw/drawRender'
 import { TreeOption } from '../common/tree'
-import { getNodeInfo, getNodeLevel, getTextWidth, sortNodes } from '../utils/common'
+import { getTextWidth } from '../utils/common'
+import { getNodeInfo, getNodeLevel, sortNodes } from '../utils/nodeUtils'
 import { NodeInfo } from '../common/node/helper'
 export default function () {
 
@@ -57,7 +58,7 @@ export default function () {
       const editNode = flatNodes.find(item => item.id === checkNode.id) as NodeOptions;
       editNode.width = getTextWidth(checkNode, target.innerText) + NodeTextPadding[getNodeLevel(checkNode)] * 2;
       editNode.text = target.innerText;
-      
+
       if (callback) callback();
     })
   }

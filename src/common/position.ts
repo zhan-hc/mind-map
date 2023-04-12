@@ -1,4 +1,3 @@
-import { TreeOption } from './tree';
 import { NodeOptions } from './node';
 import { NodeType } from './node/helper';
 import { flatNodes, moduleInterval, modulePadding } from '../constant/index'
@@ -10,11 +9,20 @@ export interface positionOption {
 }
 
 export interface connectPositionOption {
-  leftBotX: number,
-  rightBotX: number,
-  leftBotY: number,
-  rightBotY: number
+  leftX: number,
+  rightX: number,
+  leftY: number,
+  rightY: number
 }
+
+/*
+此图就代表节点之间的连接线的坐标（startXY到leftXY是曲线）
+ ___________                      ___________
+ |         |                      |         |
+ |  rect   |startXY------         |  rect   |
+ |         |            |         |         |
+ ￣￣￣￣￣￣            ----leftXY￣￣￣￣￣￣rightXY
+*/
 
 class AreaHeight {
   // private readonly areaHeightMap: Map<string, number> = {};
@@ -81,16 +89,16 @@ class Position {
           x: node.nextStartPosition ? node.nextStartPosition.x : (node.x + node.width),
           y: node.nextStartPosition ? node.nextStartPosition.y : (centerY)
         }
-        // 当前节点的子节点的起始坐标（为了后续递归可调用）
+        // 下次该子节点有子节点的时候其连接线的起始位置为节点矩形的右下角
         item.nextStartPosition = {
           x: item.x + item.width,
           y: item.y + item.height
         }
         const endPosition = {
-          leftBotX: item.x,
-          leftBotY: item.y + item.height ,
-          rightBotX: item.nextStartPosition.x,
-          rightBotY: item.nextStartPosition.y
+          leftX: item.x,
+          leftY: item.y + item.height ,
+          rightX: item.nextStartPosition.x,
+          rightY: item.nextStartPosition.y
         }
         item.line = this.drawGenerator.drawChildLine(startPosition, endPosition)
       }
