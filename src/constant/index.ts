@@ -9,22 +9,22 @@ export const textPadding = 10 // 文本左右边距
 
 export const iconList: operateOption[] = reactive([
   {
-    icon: operateIcons[0],
+    icon: operateIcons[operateType.addTopic],
     disabled: true,
     type: operateType.addTopic
   },
   {
-    icon: operateIcons[1],
+    icon: operateIcons[operateType.addSubTopic],
     disabled: true,
     type: operateType.addSubTopic
   },
   {
-    icon: operateIcons[2],
+    icon: operateIcons[operateType.editTopic],
     disabled: true,
     type: operateType.editTopic
   },
   {
-    icon: operateIcons[3],
+    icon: operateIcons[operateType.delTopic],
     disabled: true,
     type: operateType.delTopic
   }

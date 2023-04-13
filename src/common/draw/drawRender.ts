@@ -8,9 +8,11 @@ import { NodeOptions } from '../node';
 import { Paper } from '../paper';
 import DrawGenerator from './drawGenerator';
 import { DRAW_CALLBACK_TYPE } from './type';
+import { ViewPort } from '../paper/viewport';
 export class DrawRender {
   private readonly paper: RaphaelPaper;
   private readonly drawGenerator: DrawGenerator;
+  public viewPort : ViewPort;
   public  checkNode: TreeOption | null; // 当前选中节点
   public checkBorder: RaphaelElement | null; // 选中的边框
   public constructor(paper: Paper) {
@@ -18,6 +20,7 @@ export class DrawRender {
     this.drawGenerator = paper.getDrawGenertator()
     this.checkNode = null
     this.checkBorder = null
+    this.viewPort = new ViewPort(paper)
   }
 
   // 绘制节点

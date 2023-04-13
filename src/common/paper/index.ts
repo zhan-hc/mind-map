@@ -4,10 +4,10 @@ import DrawGenerator from '../draw/drawGenerator';
 export class Paper {
   private readonly paper: RaphaelPaper;
   public readonly drawGenrtator: DrawGenerator;
-
+  public readonly paperEle: HTMLElement;
   public constructor(container: string | Element) {
-    const wrapDom = this.getPaperElement(container)
-    this.paper = new Raphael(wrapDom, wrapDom.clientWidth, wrapDom.clientHeight);
+    this.paperEle = this.getElement(container)
+    this.paper = new Raphael(this.paperEle, this.paperEle.clientWidth, this.paperEle.clientHeight);
     this.drawGenrtator = new DrawGenerator(this.paper)
   }
 
@@ -19,7 +19,7 @@ export class Paper {
     return this.drawGenrtator;
   }
 
-  public getPaperElement (container: string | Element) : HTMLElement {
+  public getElement (container: string | Element) : HTMLElement {
     const containerDom = (typeof container === 'string' ? document.querySelector(container) : container) as HTMLElement
     if (!containerDom) {
       throw new Error(`${container} is not exist`);
@@ -28,6 +28,10 @@ export class Paper {
       throw new Error('The width or height of Container is not more than 0')
     }
     return containerDom
+  }
+
+  public getPaperElement () {
+    return this.paperEle
   }
 
   public clear(): void {

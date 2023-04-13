@@ -1,5 +1,4 @@
 <script setup lang="ts">
-// @unocss-include
 import { toRefs } from 'vue'
 import { operateOption } from '../utils/type'
 
@@ -11,11 +10,11 @@ const props = defineProps({
 })
 
 const { iconList }  = toRefs(props)
-const emit  = defineEmits(['operate'])
+const emit  = defineEmits(['handleOperate'])
 
 function handleOperate (item: operateOption): void {
   if (!item.disabled) {
-    emit('operate', item.type)
+    emit('handleOperate', item.type)
   }
 }
 </script>
@@ -44,7 +43,7 @@ function handleOperate (item: operateOption): void {
   transform: translateX(-50%);
   border-radius: 5px;
   box-sizing: border-box;
-  box-shadow: 0 0 2px #00000d, inset 0 0 1px #000, 0 2px 2px #00001a;
+  box-shadow: 0 0 10px #0000000d, inset 0 0 1px #0003, 0 12px 40px #0000001a;
 }
 .operate-item {
   position: relative;
