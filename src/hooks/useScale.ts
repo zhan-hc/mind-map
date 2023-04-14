@@ -1,9 +1,9 @@
 import { ref } from 'vue'
-import { ViewPort } from '../common/paper/viewport'
+import { Viewport } from '../common/paper/viewport'
 export default function () {
   const ratio = ref(100)
 
-  function changeRatio (type: 1|0, viewPort: ViewPort) {
+  function changeRatio (type: 1|0, viewPort: Viewport) {
     const coef = viewPort.getScaleOption().coef
     const maxSize = viewPort.getScaleMaxSize() * 100
     const minSize = viewPort.getScaleMinSize() * 100

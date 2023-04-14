@@ -1,7 +1,7 @@
 import { operateOption, operateType } from '../../utils/type'
 import { NodeOptions } from '../node/index'
 export interface TreeOption extends NodeOptions{
-  children?: NodeOptions[] | null
+  children: TreeOption[]
 }
 export class Tree {
   public treeNodes: TreeOption[]
@@ -47,6 +47,10 @@ export class Tree {
     }
     this.treeNodes = result;
     return result;
+  }
+
+  public getTreeNodes () :TreeOption[] {
+    return this.treeNodes
   }
 }
 

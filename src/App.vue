@@ -9,7 +9,7 @@ import useScale from './hooks/useScale';
 import { flatNodes, iconList } from './constant'
 import { TreeOption } from './common/tree';
 import { deleteNodeLists, getFlatNodeIds } from './utils/nodeUtils';
-import { ViewPort } from './common/paper/viewport';
+import { Viewport } from './common/paper/viewport';
 
   const callbackObject: any = {}
 
@@ -37,7 +37,7 @@ import { ViewPort } from './common/paper/viewport';
 
   // 缩放
   function handleZoomFunc (type: 0|1) {
-    const viewPort = drawRender.value?.viewPort as ViewPort
+    const viewPort = drawRender.value?.viewPort as Viewport
     changeRatio(type, viewPort)
   }
 

@@ -142,11 +142,25 @@ export function deleteNodeLists (flatNodes: NodeOptions[], nodeChildLists: Array
 }
 
 // 获取节点层级
-
 export function getNodeLevel (node: NodeOptions) {
   if (node.id === NodeType.root.toString()) return 'first'
   else if (node.parentId === NodeType.root.toString()) return 'second'
   else return 'others'
+}
+
+// 获取节点的area区域
+export function getNodeAreaList (flatNodes: NodeOptions[]) {
+  const areaList:any = []
+  flatNodes.forEach(node => {
+    areaList.push({
+      node: node,
+      x: node.x,
+      y: node.y,
+      x2: node.x + node.width,
+      y2: node.y + node.height
+    })
+  })
+  return areaList
 }
 
 // --------------------------------------------------------------------------------- //
@@ -175,3 +189,4 @@ export function changeNodeExpand (flatNodes: NodeOptions[], id: string) {
     }
   }
 }
+

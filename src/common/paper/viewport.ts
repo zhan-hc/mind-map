@@ -9,7 +9,7 @@ interface scaleOption {
   w: number, // 以(x,y)为原点的宽度
   h: number
 }
-export class ViewPort {
+export class Viewport {
   private readonly paper: Paper;
   private scale: scaleOption;
   private maxSize: number; // 允许放大的最大倍数

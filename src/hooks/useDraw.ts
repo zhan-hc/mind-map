@@ -6,6 +6,7 @@ import Position from "../common/position"
 import Tree, { TreeOption } from "../common/tree"
 import { flatNodes } from "../constant"
 import { changeNodeExpand } from '../utils/nodeUtils'
+import { DRAW_CALLBACK_TYPE } from '../common/draw/type'
 
 interface dataOption {
   tree:  Tree | null,
@@ -22,7 +23,7 @@ export default function () {
   })
   function initPaper () {
     data.tree = new Tree(flatNodes);
-   data.paper = new Paper('#paper');
+    data.paper = new Paper('#paper');
     data.drawGenerator = new DrawGenerator(data.paper.getPaper());
     data.drawRender = new DrawRender(data.paper);
     reDraw();
@@ -30,14 +31,15 @@ export default function () {
 
   function reDraw (newNodeId = '') {
     const position = new Position(data.drawGenerator as DrawGenerator)
-    // 对节点重新计算位置
-    position.getNodePosition(flatNodes[0])
     // 重新更改tree数据
     data.tree?.arrayToTree(flatNodes)
+    const treeNodes = (data?.tree?.getTreeNodes()[0]) as TreeOption
+    // 对节点重新计算位置
+    position.getNodePosition(treeNodes)
     data.paper?.clear()
     // 展开按钮的回调
     const callbackObj = {
-      expand: function (node: TreeOption) {
+      [DRAW_CALLBACK_TYPE.EXPAND]: function (node: TreeOption) {
         changeNodeExpand(flatNodes, node.id)
         reDraw()
       }

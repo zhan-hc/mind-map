@@ -2,25 +2,27 @@ import { reactive } from 'vue'
 import type { RaphaelPaper, RaphaelElement, RaphaelReadAttributes } from 'raphael';
 import { TreeOption } from '../tree/index'
 import { changeIconDisabled } from '../../utils/common'
-import { getNodeCenterPosition,  getNodeIconPosition,  getNodeRectAttr, getNodeRectBorder, getNodeRectInfo, getNodeTextAttr, setNodeRectAttr } from '../../utils/nodeUtils'
-import { iconList } from '../../constant'
+import { getNodeCenterPosition, getNodeIconPosition,  getNodeRectAttr, getNodeRectBorder, getNodeRectInfo, getNodeTextAttr, setNodeRectAttr, getNodeAreaList } from '../../utils/nodeUtils'
+import { flatNodes, iconList } from '../../constant'
 import { NodeOptions } from '../node';
 import { Paper } from '../paper';
 import DrawGenerator from './drawGenerator';
 import { DRAW_CALLBACK_TYPE } from './type';
-import { ViewPort } from '../paper/viewport';
+import { Viewport } from '../paper/viewport';
 export class DrawRender {
   private readonly paper: RaphaelPaper;
   private readonly drawGenerator: DrawGenerator;
-  public viewPort : ViewPort;
+  public viewport : Viewport;
   public  checkNode: TreeOption | null; // 当前选中节点
   public checkBorder: RaphaelElement | null; // 选中的边框
+  public dragInsertEle: RaphaelElement | null; // 拖拽可插入的区域显示
   public constructor(paper: Paper) {
     this.paper = paper.getPaper()
     this.drawGenerator = paper.getDrawGenertator()
+    this.viewport = new Viewport(paper)
     this.checkNode = null
     this.checkBorder = null
-    this.viewPort = new ViewPort(paper)
+    this.dragInsertEle = null
   }
 
   // 绘制节点
@@ -29,7 +31,7 @@ export class DrawRender {
       const st = this.paper.set()
       const rect = this.drawGenerator.drawRect(getNodeRectInfo(node, 5), getNodeRectAttr(node, 0) as RaphaelReadAttributes) // 底层节点
       const text = this.drawGenerator.drawText(getNodeCenterPosition(node), node.text, getNodeTextAttr(node) as RaphaelReadAttributes) // 文本
-      const wrapRect = this.drawWrapRect(node)
+      const wrapRect = this.drawWrapRect(node, callback[DRAW_CALLBACK_TYPE.DRAG] || null)
       st.push(rect, text, wrapRect)
 
       if (node.line) {
@@ -69,7 +71,7 @@ export class DrawRender {
   }
 
   // 绘制最顶层的矩形节点(即悬浮可点击节点)
-  public drawWrapRect (node: TreeOption) {
+  public drawWrapRect (node: TreeOption, cb?: any) {
     const that = this
     const data = {
       key: 'node',
@@ -105,8 +107,6 @@ export class DrawRender {
   public getCheckNode () {
     return this.checkNode
   }
-
-  
 
   public clear(): void {
     this.paper.clear();
