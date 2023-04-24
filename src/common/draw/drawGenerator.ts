@@ -1,20 +1,21 @@
 import type { RaphaelPaper, RaphaelReadAttributes } from 'raphael';
 import { positionOption, connectPositionOption } from '../position';
+import { EXPAND_CIRCLE } from '../../constant/attr';
 
 export interface rectOption extends positionOption {
-  width: number,
-  height: number,
-  radius?: number
+  width: number;
+  height: number;
+  radius?: number;
 }
 export interface circleOption extends positionOption {
-  x: number,
-  y: number,
-  radius: number
+  x: number;
+  y: number;
+  radius: number;
 }
 
 interface rectData {
-  key: string,
-  value: any
+  key: string;
+  value: any;
 }
 class DrawGenerator {
   private readonly paper: RaphaelPaper
@@ -53,7 +54,7 @@ class DrawGenerator {
   // 绘制图标(展开和收藏图标)1+/0-
   public drawExpandIcon (position: circleOption,data?: rectData, type?: boolean) {
     const st = this.paper.set()
-    const circle = this.drawCircle(position, {'stroke': '#262626', 'stroke-width': 2, 'fill': '#ccc'} as RaphaelReadAttributes)
+    const circle = this.drawCircle(position, EXPAND_CIRCLE as RaphaelReadAttributes)
     const horizontalLine = this.drawLine(`M${position.x - (position.radius / 2)} ${position.y}L${position.x + (position.radius / 2)} ${position.y}Z`)
     
     if (type) {

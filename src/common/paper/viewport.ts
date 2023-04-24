@@ -1,13 +1,14 @@
 import { Paper } from '.';
+import { VIEWPORT_SIZE } from '../../constant';
 import { getAssetsFile } from '../../utils/common';
 
 interface scaleOption {
-  coef: number, // 每次放大、缩小的增量
-  zoom: number, // 目前的大小与原来大小的比例
-  x: number, // 缩放的坐标
-  y: number,
-  w: number, // 以(x,y)为原点的宽度
-  h: number
+  coef: number; // 每次放大、缩小的增量
+  zoom: number; // 目前的大小与原来大小的比例
+  x: number; // 缩放的坐标
+  y: number;
+  w: number; // 以(x,y)为原点的宽度
+  h: number;
 }
 export class Viewport {
   private readonly paper: Paper;
@@ -21,8 +22,8 @@ export class Viewport {
   private keyDown: boolean; // 空格键盘是否是按住状态
   public constructor(paper: Paper) {
     this.paper = paper
-    this.maxSize = 3;
-    this.minSize = 0.5;
+    this.maxSize = VIEWPORT_SIZE.MAX;
+    this.minSize = VIEWPORT_SIZE.MIN;
     this.paperWidth = this.paper.getPaperElement().clientWidth;
     this.paperHeight = this.paper.getPaperElement().clientHeight;
     this.scale = { coef: 0.05, zoom: 1, x: 0, y: 0, w: this.paperWidth, h: this.paperHeight }

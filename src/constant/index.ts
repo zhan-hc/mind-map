@@ -64,3 +64,15 @@ export const NodeTextPadding =  {
   second: 16,
   others: 12
 }
+
+export const dragNodeInfo = {
+  width: 60,
+  height: 20,
+  radius: 5
+}
+
+
+export const VIEWPORT_SIZE = {
+  MIN: 0.5,
+  MAX: 3
+}

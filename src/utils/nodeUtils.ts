@@ -148,21 +148,6 @@ export function getNodeLevel (node: NodeOptions) {
   else return 'others'
 }
 
-// 获取节点的area区域
-export function getNodeAreaList (flatNodes: NodeOptions[]) {
-  const areaList:any = []
-  flatNodes.forEach(node => {
-    areaList.push({
-      node: node,
-      x: node.x,
-      y: node.y,
-      x2: node.x + node.width,
-      y2: node.y + node.height
-    })
-  })
-  return areaList
-}
-
 // --------------------------------------------------------------------------------- //
 
 /**

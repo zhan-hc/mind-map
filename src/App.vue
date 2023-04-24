@@ -37,7 +37,7 @@ import { Viewport } from './common/paper/viewport';
 
   // 缩放
   function handleZoomFunc (type: 0|1) {
-    const viewPort = drawRender.value?.viewPort as Viewport
+    const viewPort = drawRender.value?.viewport as Viewport
     changeRatio(type, viewPort)
   }
 
