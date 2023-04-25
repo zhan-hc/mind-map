@@ -1,5 +1,5 @@
-import { NodeOptions } from '../common/node'
-import { NodeType, NodeInfo } from '../common/node/helper'
+import Node, { NodeOptions } from '../common/node/node'
+import { NodeType, NodeInfo, NodeTypeId } from '../common/node/helper'
 import { getNodeInfo } from './nodeUtils';
 import { operateOption, operateType } from './type'
 
@@ -10,7 +10,7 @@ export function randomId() {
 }
 
 // 获取文本宽度
-export function getTextWidth(node: NodeOptions, str = '') {
+export function getTextWidth(node: Node, str = '') {
   const dom = document.createElement('span');
   const App = document.getElementById('app')
   dom.style.display = 'inline-block';
@@ -18,7 +18,6 @@ export function getTextWidth(node: NodeOptions, str = '') {
   dom.textContent = str;
   App?.appendChild(dom);
   const width = dom.clientWidth;
-  console.log('文本宽度：', width)
   App?.removeChild(dom);
   return width;
 }
@@ -26,7 +25,7 @@ export function getTextWidth(node: NodeOptions, str = '') {
 // 改变操作icon的disabled属性
 export function changeIconDisabled (checkNode: NodeOptions, iconList: operateOption[]) {
   // 如果是根节点不能添加兄弟节点和删除节点
-  if (checkNode.id === NodeType.root.toString()) {
+  if (checkNode.id === NodeTypeId.root) {
     iconList.forEach(item => {
       if (![operateType.addTopic, operateType.delTopic].includes(item.type)) {
         item.disabled = false

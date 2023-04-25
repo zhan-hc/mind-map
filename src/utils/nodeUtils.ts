@@ -1,11 +1,9 @@
 /**
  * 节点相关的操作方法
  */
-import { NodeOptions } from '../common/node'
-import { NodeType, NodeInfo, NodeInfoList } from '../common/node/helper'
+import Node from '../common/node/node'
+import { NodeType, NodeInfo, NodeInfoList, NodeTypeId, NodeLevel } from '../common/node/helper'
 import { positionOption } from '../common/position'
-import { TreeOption } from '../common/tree'
-import { flatNodes } from '../constant'
 import { operateType } from './type'
 
 /**
@@ -13,29 +11,29 @@ import { operateType } from './type'
  */
 
 // 获取矩形节点的信息
-export function getNodeRectInfo (node: TreeOption, radius: number) {
+export function getNodeRectInfo (node: Node, radius: number) {
   return {
-    x: node.x,
-    y: node.y,
-    width: node.width,
-    height: node.height,
+    x: node.attr.x,
+    y: node.attr.y,
+    width: node.attr.width,
+    height: node.attr.height,
     radius
   }
 }
 
 // 获取节点边框信息
-export function getNodeRectBorder (node: TreeOption,  radius: number, padding: number = 0) {
+export function getNodeRectBorder (node: Node,  radius: number, padding: number = 0) {
   return {
-    x: node.x - padding,
-    y: node.y - padding,
-    width: node.width + padding * 2,
-    height: node.height + padding * 2,
+    x: node.attr.x - padding,
+    y: node.attr.y - padding,
+    width: node.attr.width + padding * 2,
+    height: node.attr.height + padding * 2,
     radius
   }
 }
 
 // 获取节点矩形的属性 0/1 = 默认矩形/外层可点击矩形
-export function getNodeRectAttr (node: TreeOption, type: 0|1) {
+export function getNodeRectAttr (node: Node, type: 0|1) {
   return {
     fill: type ? 'transparent' : getNodeInfo(NodeInfo.fillColor, node),
     'stroke-width': 0
@@ -43,7 +41,7 @@ export function getNodeRectAttr (node: TreeOption, type: 0|1) {
 }
 
 // 获取节点文本的属性
-export function getNodeTextAttr (node: TreeOption) {
+export function getNodeTextAttr (node: Node) {
   return {
     'font-size': getNodeInfo(NodeInfo.fontSize, node),
     fill: getNodeInfo(NodeInfo.fontColor, node)
@@ -59,10 +57,10 @@ export function setNodeRectAttr (strokeWidth: number, stroke: string) {
 }
 
 // 获取节点的中心位置
-export function getNodeCenterPosition (node: TreeOption): positionOption {
+export function getNodeCenterPosition (node: Node): positionOption {
   return {
-    x: node.x + (1 / 2) * node.width,
-    y: node.y + (1 / 2) * node.height
+    x: node.attr.x + (1 / 2) * node.attr.width,
+    y: node.attr.y + (1 / 2) * node.attr.height
   }
 }
 
@@ -77,15 +75,15 @@ export function getNodeCenterPosition (node: TreeOption): positionOption {
  * @param newNode 
  * @param type 
  */
-export function sortNodes(newNode: NodeOptions, type: operateType) {
-  const targetId = type === operateType.addTopic ? newNode.parentId : newNode.id
-  const brotherNodes = flatNodes.filter((item) => item.parentId === targetId)
-  brotherNodes.forEach(item => {
-    if (item.id !== newNode.id && item.sort >= newNode.sort) {
-      item.sort = item.sort + 1
-    }
-  })
-}
+// export function sortNodes(newNode: Node, type: operateType) {
+//   const targetId = type === operateType.addTopic ? newNode.father.id : newNode.id
+//   const brotherNodes = flatNodes.filter((item) => item.father.id === targetId)
+//   brotherNodes.forEach(item => {
+//     if (item.id !== newNode.id && item.sort >= newNode.sort) {
+//       item.sort = item.sort + 1
+//     }
+//   })
+// }
 
 
 /**
@@ -94,7 +92,7 @@ export function sortNodes(newNode: NodeOptions, type: operateType) {
  * @param node 
  * @returns 
  */
-export function getNodeInfo (type: NodeInfo, node: NodeOptions) {
+export function getNodeInfo (type: NodeInfo, node: Node) {
   return NodeInfoList[type][getNodeLevel(node)]
 }
 
@@ -103,9 +101,9 @@ export function getNodeInfo (type: NodeInfo, node: NodeOptions) {
    * @param treeNode 
    * @returns 
    */
-export function getflatNodeChlidIds (treeNode: TreeOption): Array<string> {
+export function getflatNodeChlidIds (treeNode: Node): Array<string> {
   const idList = []
-  const children = treeNode.children as TreeOption[]
+  const children = treeNode.children as Node[]
   for (let i = 0;i < children.length; i++) {
     idList.push(children[i].id)
     if (children[i].children?.length) {
@@ -120,7 +118,7 @@ export function getflatNodeChlidIds (treeNode: TreeOption): Array<string> {
  * @param treeNode 
  * @returns 
  */
-export function getFlatNodeIds (treeNode: TreeOption): Array<string> {
+export function getFlatNodeIds (treeNode: Node): Array<string> {
   const childIds = getflatNodeChlidIds(treeNode)
   return [...childIds, treeNode.id]
 }
@@ -130,21 +128,22 @@ export function getFlatNodeIds (treeNode: TreeOption): Array<string> {
  * @param flatNodes 
  * @param nodeChildLists 
  */
-export function deleteNodeLists (flatNodes: NodeOptions[], nodeChildLists: Array<string>): void {
-  let len = flatNodes.length
-  for (let i = 0;i < len; i++) {
-    if (nodeChildLists.includes(flatNodes[i].id)) {
-      flatNodes.splice(i,1)
-      i = i - 1
-      len = len -1
-    }
-  }
-}
+// export function deleteNodeLists (flatNodes: Node[], nodeChildLists: Array<string>): void {
+//   let len = flatNodes.length
+//   for (let i = 0;i < len; i++) {
+//     if (nodeChildLists.includes(flatNodes[i].id)) {
+//       flatNodes.splice(i,1)
+//       i = i - 1
+//       len = len -1
+//     }
+//   }
+// }
 
 // 获取节点层级
-export function getNodeLevel (node: NodeOptions) {
-  if (node.id === NodeType.root.toString()) return 'first'
-  else if (node.parentId === NodeType.root.toString()) return 'second'
+export function getNodeLevel (node: Node) {
+  const pid = node.father ? node.father.id : null
+  if (node.id === NodeTypeId.root) return 'first'
+  else if (pid === NodeTypeId.root) return 'second'
   else return 'others'
 }
 
@@ -155,23 +154,23 @@ export function getNodeLevel (node: NodeOptions) {
  */
 
 // 获取展开隐藏按钮的position
-export function getNodeIconPosition (node: NodeOptions, radius: number = 10) {
+export function getNodeIconPosition (node: Node, radius: number = 10) {
   const position = {
-    x: node.x + node.width + 15,
-    y: node.y +  (getNodeLevel(node) === 'others' ? node.height : (1 / 2) * node.height),
+    x: node.attr.x + node.attr.width + 15,
+    y: node.attr.y +  (getNodeLevel(node) === NodeLevel.others ? node.attr.height : 0.5 * node.attr.height),
     radius
   }
   return position
 }
 
 // 取反节点的expand字段值
-export function changeNodeExpand (flatNodes: NodeOptions[], id: string) {
-  let len = flatNodes.length
-  for (let i = 0;i < len; i++) {
-    if (flatNodes[i].id === id) {
-      flatNodes[i].expand = !flatNodes[i].expand
-      break
-    }
-  }
-}
+// export function changeNodeExpand (flatNodes: Node[], id: string) {
+//   let len = flatNodes.length
+//   for (let i = 0;i < len; i++) {
+//     if (flatNodes[i].id === id) {
+//       flatNodes[i].expand = !flatNodes[i].expand
+//       break
+//     }
+//   }
+// }
 

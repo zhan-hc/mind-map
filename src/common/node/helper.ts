@@ -3,6 +3,14 @@ export enum NodeType {
   firstLevel,
   othersChild,
 }
+export enum NodeTypeId {
+  root = '1'
+}
+export enum NodeLevel {
+  first = 'first',
+  second = 'second',
+  others = 'others'
+}
 export enum NodeFontSize {
   first = '20px',
   second = '16px',
