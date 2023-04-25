@@ -1,19 +1,19 @@
 <script setup lang="ts">
-import { operateTotalType, operateType } from './utils/type'
+import { operateTotalType, operateType } from './utils/type';
 import { onMounted } from 'vue';
-import operate from './components/operate.vue'
-import scale from './components/scale.vue'
+import operate from './components/operate.vue';
+import scale from './components/scale.vue';
 import useOperate from './hooks/useOperate';
 import useDraw from './hooks/useDraw';
 import useScale from './hooks/useScale';
-import { flatNodes, iconList } from './constant'
-import { TreeOption } from './common/tree';
-import { deleteNodeLists, getFlatNodeIds } from './utils/nodeUtils';
+import Node from './common/node/node';
+import { iconList } from './constant';
 import { Viewport } from './common/paper/viewport';
+import EditTopic from './common/operate/editTopic';
 
   const callbackObject: any = {}
-
-  const { handleOperate, addEditToBlur } = useOperate()
+  let editTopic: EditTopic | null = null
+  const { handleOperate } = useOperate()
   const { drawRender, reDraw } = useDraw()
   const { ratio, changeRatio } = useScale()
 
@@ -22,9 +22,11 @@ import { Viewport } from './common/paper/viewport';
     callbackObject[operateTotalType.ADD] = (id: string) => {
       reDraw(id)
     }
+    callbackObject[operateTotalType.EDIT] = () => {
+      editTopic?.editText(drawRender.value?.checkNode as Node)
+    }
+
     callbackObject[operateTotalType.DELETE] = () => {
-      const checkNode = drawRender?.value?.checkNode as TreeOption
-      deleteNodeLists(flatNodes, getFlatNodeIds(checkNode))
       reDraw()
     }
     handleOperate(drawRender, type, callbackObject)
@@ -32,7 +34,8 @@ import { Viewport } from './common/paper/viewport';
 
   // 节点编辑失焦事件
   function handleEditBlur () {
-    addEditToBlur(drawRender, () => reDraw())
+    console.log(editTopic, 'handleEditBlur')
+    editTopic && (editTopic as EditTopic).addEventBlus(drawRender, () => reDraw())
   }
 
   // 缩放
@@ -42,6 +45,10 @@ import { Viewport } from './common/paper/viewport';
   }
 
   onMounted(() => {
+    editTopic = new EditTopic({
+      wrapName: '.edit-wrap',
+      inputName: '.edit-text'
+    })
     handleEditBlur()
   })
 
@@ -51,15 +58,15 @@ import { Viewport } from './common/paper/viewport';
 <template>
   <operate @handleOperate="handleOperateFunc" :iconList="iconList"></operate>
   <div id="paper" style="width:100vw;height:100vh;">
-    <div class="node-edit-wrap">
-      <div class="node-text" contenteditable="true"></div>
+    <div class="edit-wrap">
+      <div class="edit-text" contenteditable="true"></div>
     </div>
   </div>
   <scale :ratio="ratio" @handleZoom="handleZoomFunc"></scale>
 </template>
 
 <style scoped>
-.node-edit-wrap {
+.edit-wrap {
   display: none;
   position: absolute;
   top: 1500px;
@@ -67,7 +74,7 @@ import { Viewport } from './common/paper/viewport';
   max-width: 200px;
   background-color: #fff;
 }
-.node-text {
+.edit-text {
   padding: 5px 10px;
   font-size: 16px;
   background-color: #fff;

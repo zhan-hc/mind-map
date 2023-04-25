@@ -1,4 +1,4 @@
-import { NodeOptions } from '../common/node'
+import { NodeOptions } from '../common/node/node'
 import { operateType, operateOption } from '../utils/type'
 import { operateIcons } from '../utils/unocss-icon'
 import { reactive } from 'vue'
@@ -44,20 +44,6 @@ export const NodeWidthHeight = {
     height: 40
   }
 }
-
-export const flatNodes : NodeOptions[] = [
-  {
-    id: '1',
-    text: 'My Root',
-    x: 100,
-    y: 500,
-    parentId: null,
-    width: NodeWidthHeight.first.width,
-    height: NodeWidthHeight.first.height,
-    sort: 0,
-    expand: true
-  }
-]
 
 export const NodeTextPadding =  {
   first: 18,

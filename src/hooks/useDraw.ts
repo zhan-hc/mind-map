@@ -3,10 +3,9 @@ import DrawGenerator from "../common/draw/drawGenerator"
 import { DrawRender } from "../common/draw/drawRender"
 import { Paper } from "../common/paper"
 import Position from "../common/position"
-import Tree, { TreeOption } from "../common/tree"
-import { flatNodes } from "../constant"
-import { changeNodeExpand } from '../utils/nodeUtils'
+import Tree from "../common/tree/tree"
 import { DRAW_CALLBACK_TYPE } from '../common/draw/type'
+import Node, { getInitData } from '../common/node/node'
 
 interface dataOption {
   tree:  Tree | null,
@@ -22,7 +21,7 @@ export default function () {
     drawRender: null
   })
   function initPaper () {
-    data.tree = new Tree(flatNodes);
+    data.tree = new Tree({data: getInitData()});
     data.paper = new Paper('#paper');
     data.drawGenerator = new DrawGenerator(data.paper.getPaper());
     data.drawRender = new DrawRender(data.paper);
@@ -30,26 +29,23 @@ export default function () {
   }
 
   function reDraw (newNodeId = '') {
-    const position = new Position(data.drawGenerator as DrawGenerator)
-    // 重新更改tree数据
-    data.tree?.arrayToTree(flatNodes)
-    const treeNodes = (data?.tree?.getTreeNodes()[0]) as TreeOption
+    const position = new Position()
+    const rootTree = (data.tree as Tree).getRoot()
     // 对节点重新计算位置
-    position.getNodePosition(treeNodes)
+    position.getNodePosition(rootTree)
     data.paper?.clear()
     // 展开按钮的回调
     const callbackObj = {
-      [DRAW_CALLBACK_TYPE.EXPAND]: function (node: TreeOption) {
-        changeNodeExpand(flatNodes, node.id)
+      [DRAW_CALLBACK_TYPE.EXPAND]: function () {
         reDraw()
       },
-      [DRAW_CALLBACK_TYPE.DRAG]: {
-        treeNodes,
-        flatNodes,
-        reDraw: reDraw
-      }
+      // [DRAW_CALLBACK_TYPE.DRAG]: {
+      //   treeNodes: rootTree,
+      //   flatNodes,
+      //   reDraw: reDraw
+      // }
     }
-    data.tree && data.drawRender?.drawTopic(data.tree.treeNodes, newNodeId, callbackObj)
+    data.tree && data.drawRender?.drawTopic(rootTree, newNodeId, callbackObj)
 
     // test 生成可插入区域
     // const insertAreaList = position.getNodeInsertArea(treeNodes, [])
