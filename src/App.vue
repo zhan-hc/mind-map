@@ -34,7 +34,6 @@ import EditTopic from './common/operate/editTopic';
 
   // 节点编辑失焦事件
   function handleEditBlur () {
-    console.log(editTopic, 'handleEditBlur')
     editTopic && (editTopic as EditTopic).addEventBlus(drawRender, () => reDraw())
   }
 

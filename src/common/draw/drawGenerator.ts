@@ -13,7 +13,7 @@ export interface circleOption extends positionOption {
   radius: number;
 }
 
-interface rectData {
+export interface rectData {
   key: string;
   value: any;
 }

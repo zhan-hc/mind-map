@@ -45,3 +45,14 @@ export function changeIconDisabled (checkNode: NodeOptions, iconList: operateOpt
 export function getAssetsFile (url: string) {
   return new URL(`../assets/${url}`, import.meta.url).href
 }
+
+export function getCenterXY (x:number, y:number, x2:number, y2:number) {
+  const width = x2 - x
+  const height = y2 - y
+  const cx = x + 0.5 * width
+  const cy = y + 0.5 * height
+  return {
+    cx,
+    cy
+  }
+}
