@@ -1,7 +1,7 @@
 /**
  * 节点相关的操作方法
  */
-import Node from '../common/node/node'
+import Node, { dragAreaOption } from '../common/node/node'
 import { NodeType, NodeInfo, NodeInfoList, NodeTypeId, NodeLevel } from '../common/node/helper'
 import { positionOption } from '../common/position'
 import { operateType } from './type'
@@ -140,7 +140,7 @@ export function getFlatNodeIds (treeNode: Node): Array<string> {
 // }
 
 // 获取节点层级
-export function getNodeLevel (node: Node) {
+export function getNodeLevel (node: Node | dragAreaOption) {
   const pid = node.father ? node.father.id : null
   if (node.id === NodeTypeId.root) return 'first'
   else if (pid === NodeTypeId.root) return 'second'

@@ -1,14 +1,13 @@
-import { reactive } from 'vue'
 import type { RaphaelPaper, RaphaelElement, RaphaelReadAttributes, RaphaelSet } from 'raphael';
-import { changeIconDisabled } from '../../utils/common'
+import { changeIconDisabled, getCenterXY } from '../../utils/common'
 import { getNodeCenterPosition, getNodeIconPosition,  getNodeLevel,  getNodeRectAttr, getNodeRectBorder, getNodeRectInfo, getNodeTextAttr, setNodeRectAttr } from '../../utils/nodeUtils'
-import { dragNodeInfo, iconList } from '../../constant'
-import Node from '../node/node';
+import { NodeWidthHeight, dragNodeInfo, iconList } from '../../constant'
+import Node, { dragAreaOption, shapeAttr } from '../node/node';
 import { Paper } from '../paper';
-import DrawGenerator from './drawGenerator';
+import DrawGenerator, { rectData } from './drawGenerator';
 import { DRAW_CALLBACK_TYPE } from './type';
 import { Viewport } from '../paper/viewport';
-import Position, { connectPositionOption, dragPositionOption } from '../position';
+import Position, { connectPositionOption, insertAreaOption } from '../position';
 import { NodeLevel, NodeType, NodeTypeId } from '../node/helper';
 import { DEFAULT_LINE_WIDTH, DRAG_PLACEHOLDER_LINE, DRAG_PLACEHOLDER_RECT, DRAG_START_CUR_RECT, NONE_BORDER } from '../../constant/attr';
 export class DrawRender {
@@ -32,17 +31,17 @@ export class DrawRender {
     const st = this.paper.set()
     const rect = this.drawGenerator.drawRect(getNodeRectInfo(node, 5), getNodeRectAttr(node, 0) as RaphaelReadAttributes) // 底层节点
     const text = this.drawGenerator.drawText(getNodeCenterPosition(node), node.text, getNodeTextAttr(node) as RaphaelReadAttributes) // 文本
-    const wrapRect = this.drawWrapRect(node, rect, callback || null)
+    const wrapRect = this.drawWrapRect(node, callback || null)
     st.push(rect, text, wrapRect)
     // 节点连接线
-    const line = this.drawLine(callback[node.father ? node.father.id : 0], node)
+    const line = this.drawLine(node)
     if (line) {
       st.push(line)
     }
-
+    if (node.id === NodeTypeId.root) {
+      callback[node.id] = node
+    }
     node.setShape(rect)
-
-    callback[node.id || 0] = node
 
     // 如果是新增节点则默认选中新节点
     if (node.id === checkNodeId) {
@@ -79,18 +78,15 @@ export class DrawRender {
   }
 
   // 绘制最顶层的矩形节点(即悬浮可点击节点)
-  public drawWrapRect (node: Node, bindRect?: RaphaelElement, cb?: any) {
+  public drawWrapRect (node: Node, cb?: any) {
     const that = this
     const data = {
       key: 'node',
       value: node
     }
     const wrapRect = this.drawGenerator.drawRect(getNodeRectBorder(node, 5, 4), getNodeRectAttr(node, 1) as RaphaelReadAttributes, data)
-    
-    if (bindRect) {
-      wrapRect.data('rect', bindRect)
-    }
 
+    // 点击事件
     wrapRect.click(function () {
       that.checkNode = this.data(data.key)
       // 更新操作栏的图标状态
@@ -100,72 +96,76 @@ export class DrawRender {
       that.checkBorder = that.drawCheckRect(node)
     })
 
+    // 拖拽事件
     if (cb && cb[DRAW_CALLBACK_TYPE.DRAG]) {
-      // const { treeNodes, flatNodes, reDraw } = cb[DRAW_CALLBACK_TYPE.DRAG]
-      // const position = new Position()
-      // let curNode: dragPositionOption | null = null;
+      const position = new Position()
+      let insertArea: insertAreaOption | null = null;
 
-      // wrapRect.drag(function onmove (x, y, cx, cy, e) {
-      //   const nodeData = this.data('node')
-      //   if (nodeData.id === NodeTypeId.root) {
-      //     return
-      //   }
-      //   // 拖拽的对象红色虚线框标注
-      //   const rect = this.data('rect')
-      //   rect.attr(DRAG_START_CUR_RECT)
-      //   const list = position.getNodeInsertArea(treeNodes, [], nodeData).sort((a,b) => (b.level - a.level))
-      //   // 获取拖拽鼠标坐标所在的插入区域
-      //   for (let i = 0;i<list.length;i++) {
-      //     if (cx > list[i].x && cy > list[i].y && cx <= list[i].x2 && cy <= list[i].y2) {
-      //       // 如果拖拽在当前节点上下区域
-      //       if (list[i].node.id === nodeData.id) {
-      //         curNode = {
-      //           node: nodeData,
-      //           cx: nodeData.x,
-      //           cy: nodeData.y+ 0.5 * (nodeData.height - dragNodeInfo.height)
-      //         } as any
-      //       } else {
-      //         curNode = list[i]
-      //       }
-      //       break;
-      //     }
-      //   }
-      //   // 如果有找到可插入区域并且（不是同一个层级或者id与上一次不一致）
-      //   if (curNode && (!that.dragInsertEle || curNode.node.father.id !== nodeData.father.id || nodeData.id !== curNode.node.id)) {
-      //     that.dragInsertEle?.remove()
-      //     that.dragInsertEle = that.drawDragRect(curNode, cb[curNode.node[curNode.level === 1 ? 'id' : 'father.id'] as string])
-      //   }
-      // }, function onstart (x,y,e) {
-      // }, function onend (e) {
-      //   const rect = this.data('rect')
-      //   const nodeData = this.data('node')
-      //   that.dragInsertEle?.remove()
-      //   rect.attr(NONE_BORDER)
-      //   if (curNode && (!that.dragInsertEle || curNode.node.father.id !== nodeData.father.id || nodeData.id !== curNode.node.id)) {
-      //     console.log('拖拽生效', treeNodes)
-      //     flatNodes.find((item: Node) => item.id === nodeData.id)['father.id'] = curNode?.node[curNode.level === 1 ? 'id' : 'father.id']
-      //     const brotherNodes = flatNodes.filter((item: Node) => item.father.id === curNode?.node.father.id)
-      //     console.log(brotherNodes, 'brotherNodes', curNode, ' curNode')
-      //     brotherNodes.forEach((item: Node) => {
-      //       console.log(item, 'item', curNode, 'curNode', curNode?.insertIndex)
-      //       const insetIndex = curNode?.insertIndex as number
-      //       if (item.id === nodeData.id) {
-      //         item.setSort(insetIndex)
-      //       } else {
-      //         if (item.sort >= insetIndex) {
-      //           item.setSort(cb[item.id].sort + 1)
-      //         } else {
-      //           item.setSort(cb[item.id].sort)
-      //         }
-      //       }
-      //     })
-      //     console.log(flatNodes, 'flatNodes')
-      //     reDraw()
-      //   }
-        
-      //   curNode = null
-  
-      // })
+      wrapRect.drag(function onmove (x, y, cx, cy, e) {
+        const node = this.data('node')
+        if (node.id === NodeTypeId.root) {
+          return
+        }
+        // 拖拽的节点设置红色虚线框
+        node.shape.attr(DRAG_START_CUR_RECT)
+        const list = position.getNodeInsertArea(cb[NodeTypeId.root], [], node)
+        // 拖拽的时候生成可插入区域
+        // list.forEach((item:any) => {
+        //   const aa = that.drawGenerator.drawRect({x: item.area.x,y:item.area.y,width: item.area.x2 - item.area.x, height: item.area.y2-item.area.y,radius: 0}, {fill: '#fff8dc'} as any)
+        //   aa.toBack()
+        // })
+
+        const dragId = that.dragInsertEle && that.dragInsertEle.data('dragId')
+        // 获取拖拽鼠标坐标所在的插入区域
+        for (let i = 0;i<list.length;i++) {
+          if (cx > list[i].area.x && cy > list[i].area.y && cx <= list[i].area.x2 && cy <= list[i].area.y2) {
+            insertArea = list[i]
+            break;
+          }
+        }
+        // 如果拖拽区域与上次是同个区域
+        if (that.dragInsertEle && dragId === insertArea?.id) {
+          console.log('xiangtongquyu ')
+          return
+        }
+        if (insertArea) {
+          that.dragInsertEle?.remove()
+          that.dragInsertEle = that.drawDragRect(insertArea, {key: 'dragId', value: insertArea.id})
+        }
+      }, function onstart (x,y,e) {
+      }, function onend (e) {
+        const dragId = that.dragInsertEle && that.dragInsertEle.data('dragId')
+        if (that.dragInsertEle && dragId === insertArea?.id) {
+          return
+        }
+        that.dragInsertEle?.remove()
+        const node = this.data('node')
+        node.shape.attr(NONE_BORDER)
+        if (insertArea) {
+          // 删除该节点
+          node.father.removeChild(node)
+          // 对其父节点的子节点sort重新设值
+          node.father.sortChild()
+          // 拖拽的节点更改父节点
+          node.setFather(insertArea.father)
+          // 拖拽的节点更改节点sort
+          node.setSort(insertArea.insertIndex)
+          // 拖拽的节点更改属性
+          node.setAttr({
+            ...node.attr,
+            width: NodeWidthHeight[getNodeLevel(node)].width,
+            height: NodeWidthHeight[getNodeLevel(node)].height,
+            lineStartX: null,
+            lineStartY: null
+          })
+          // 给node的插入的父节点插入node
+          insertArea.father.pushChild(node)
+          // 并重新排序
+          insertArea.father.insertSortChild(node)
+          cb[DRAW_CALLBACK_TYPE.DRAG]()
+          insertArea = null
+        }
+      })
     }
 
     wrapRect.hover(function(){wrapRect.attr(setNodeRectAttr( 2, '#87ceeb'))}, function(){wrapRect.attr(NONE_BORDER)})
@@ -174,32 +174,38 @@ export class DrawRender {
   }
 
   // 绘制拖拽占位矩形
-  // public drawDragRect (node: dragPositionOption, pNode: Node) {
-  //   const st = this.paper.set()
-  //   // 绘制连接线
-  //   const dNode =  {
-  //     x: node.cx,
-  //     y: node.cy,
-  //     width: dragNodeInfo.width,
-  //     height: dragNodeInfo.height,
-  //   }
-  //   const rectInfo = {
-  //     ...dNode,
-  //     radius: dragNodeInfo.radius
-  //   }
-  //   const data = {
-  //     key: 'node',
-  //     value: node
-  //   }
-  //   const rect = this.drawGenerator.drawRect(rectInfo, DRAG_PLACEHOLDER_RECT as RaphaelReadAttributes, data)
-  //   const line = this.drawLine(pNode, dNode, DRAG_PLACEHOLDER_LINE as RaphaelReadAttributes) as RaphaelElement
-  //   st.push(rect, line)
-  //   return st
-  // }
+  public drawDragRect (insertArea: insertAreaOption, data?: rectData) {
+    const st = this.paper.set()
+    const {x, y, x2, y2} = insertArea.area
+    const { cx, cy } = getCenterXY(x, y, x2, y2)
+    // 拖拽占位矩形
+    const dNode =  {
+      id: insertArea.id,
+      father: insertArea.father,
+      attr: {
+        x: cx,
+        y: cy - 0.5 * dragNodeInfo.height,
+        width: dragNodeInfo.width,
+        height: dragNodeInfo.height
+      }
+    }
+    const rectInfo = {
+      ...dNode.attr,
+      radius: dragNodeInfo.radius
+    }
+    const rect = this.drawGenerator.drawRect(rectInfo, DRAG_PLACEHOLDER_RECT as RaphaelReadAttributes, data)
+    const line = this.drawLine(dNode, DRAG_PLACEHOLDER_LINE as RaphaelReadAttributes) as RaphaelElement
+    st.push(rect, line)
+    if (data) {
+      st.data(data.key, data.value)
+    }
+    return st
+  }
 
   // 绘制节点链接线
-  public drawLine (pNode: Node | undefined, node: Node, attr?: RaphaelReadAttributes) {
-    if (!pNode || node.id === NodeTypeId.root) return
+  public drawLine (node: any, attr?: RaphaelReadAttributes) {
+    const pNode = node.father
+    if (!pNode) return
     // 节点的中心坐标
     const centerPosition = {
       x: pNode.attr.x +  0.5 * pNode.attr.width,
@@ -220,7 +226,7 @@ export class DrawRender {
         y: pNode.attr.lineStartY ? pNode.attr.lineStartY : (centerPosition.y)
       }
       // 下次该子节点有子节点的时候其连接线的起始位置为节点矩形的右下角
-      node.setAttr({
+      node.setAttr && node.setAttr({
         ...node.attr,
         lineStartX: node.attr.x + node.attr.width,
         lineStartY: node.attr.y + node.attr.height

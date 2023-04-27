@@ -39,21 +39,11 @@ export default function () {
       [DRAW_CALLBACK_TYPE.EXPAND]: function () {
         reDraw()
       },
-      // [DRAW_CALLBACK_TYPE.DRAG]: {
-      //   treeNodes: rootTree,
-      //   flatNodes,
-      //   reDraw: reDraw
-      // }
+      [DRAW_CALLBACK_TYPE.DRAG]: function () {
+        reDraw()
+      }
     }
     data.tree && data.drawRender?.drawTopic(rootTree, newNodeId, callbackObj)
-
-    // test 生成可插入区域
-    // const insertAreaList = position.getNodeInsertArea(treeNodes, [])
-    // console.log(insertAreaList)
-    // insertAreaList.forEach((item:any) => {
-    //   const aa = (data.drawGenerator as DrawGenerator).drawRect({x: item.area.x,y:item.area.y,width: item.area.x2 - item.area.x, height: item.area.y2-item.area.y,radius: 0}, {fill: '#fff8dc'} as any)
-    //   // aa.toFront()
-    // })
   }
 
   onMounted(() => {

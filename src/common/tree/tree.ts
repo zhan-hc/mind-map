@@ -1,8 +1,5 @@
 import Node, { NodeOptions, createNode } from '../node/node'
 import Position from '../position';
-export interface TreeOption extends NodeOptions{
-  children: TreeOption[]
-}
 export class Tree {
   private readonly root: Node;
   private readonly position: Position;

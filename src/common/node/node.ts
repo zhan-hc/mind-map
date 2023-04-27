@@ -1,5 +1,4 @@
 import { randomId } from '../../utils/common'
-import { getNodeLevel } from '../../utils/nodeUtils'
 import { operateType } from '../../utils/type'
 import { NodeWidthHeight } from '../../constant';
 import type { RaphaelElement } from 'raphael';
@@ -11,7 +10,7 @@ export interface shapeAttr {
   width: number;
   height: number;
   lineStartX?: number;
-  lineStartY?: number
+  lineStartY?: number;
 }
 export interface NodeOptions {
   id: string;
@@ -20,7 +19,13 @@ export interface NodeOptions {
   attr: shapeAttr;
   sort: number;
   expand: boolean;
-  shape?: RaphaelElement
+  shape?: RaphaelElement;
+}
+
+export interface dragAreaOption {
+  id: string;
+  father: Node;
+  attr: shapeAttr;
 }
 
 class Node {
@@ -57,6 +62,7 @@ class Node {
   public get attr() { return this._attr; }
   public get sort() { return this._sort; }
   public get expand() { return this._expand; }
+  public get shape() { return this._shape }
   public get children() { return this._children; }
 
 
@@ -82,6 +88,21 @@ class Node {
     }
   }
 
+  public sortChild (): void {
+    this.children.forEach((item, i) => {
+      item.setSort(i)
+    })
+  }
+
+  public insertSortChild(child: Node): void {
+    const sort = child.sort
+    this.children.forEach(item => {
+      if (item.id !== child.id) {
+        item.setSort(item.sort >= sort ? (item.sort + 1) : item.sort)
+      }
+    })
+  }
+
   public isRoot(): boolean {
     return this.id === null;
   }
@@ -103,6 +124,9 @@ class Node {
   }
   public setAttr (attr: shapeAttr) {
     this._attr = attr
+  }
+  public setFather (node: Node) {
+    this._father = node
   }
 }
 
@@ -132,7 +156,7 @@ export function getInitData () {
 
 export function getChildNodeData (type: operateType, checkNode: Node) {
   const pid = checkNode.father?.id
-  const nodeLevel = (!pid || pid === NodeTypeId.root) ? NodeLevel.second : NodeLevel.others
+  const nodeLevel = (!pid || (pid === NodeTypeId.root && type === operateType.addTopic)) ? NodeLevel.second : NodeLevel.others
   const attr = {
     x: 0,
     y: 0,

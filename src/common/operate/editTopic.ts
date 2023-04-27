@@ -17,13 +17,23 @@ class EditTopic {
     wrapName: string;
     inputName: string
   }) {
+    const { editWrap, editInput } = this.getEditEle(wrapName, inputName)
+    this.editWrap = editWrap
+    this.editInput = editInput
     this.editStatus = false
-    this.editWrap = document.querySelector(wrapName)
-    this.editInput = document.querySelector(inputName)
-    if (!this.editWrap || !this.editInput) {
+    document.addEventListener('keydown', this.EventKeydown.bind(this))
+  }
+
+  public getEditEle (wrapName: string, inputName: string) {
+    const editWrap = document.querySelector(wrapName) as HTMLElement
+    const editInput = document.querySelector(inputName) as HTMLElement
+    if (!editWrap || !editInput) {
       throw new Error(`${wrapName} or ${inputName} is not exist`);
     }
-    document.addEventListener('keydown', this.EventKeydown.bind(this))
+    return {
+      editWrap,
+      editInput
+    }
   }
 
   public editText (checkNode: Node) {
