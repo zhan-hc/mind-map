@@ -28,7 +28,7 @@ export default function () {
     reDraw();
   }
 
-  function reDraw (newNodeId = '') {
+  function reDraw (newNodeId = '', cb?: any) {
     const position = new Position()
     const rootTree = (data.tree as Tree).getRoot()
     // 对节点重新计算位置
@@ -41,7 +41,8 @@ export default function () {
       },
       [DRAW_CALLBACK_TYPE.DRAG]: function () {
         reDraw()
-      }
+      },
+      ...cb
     }
     data.tree && data.drawRender?.drawTopic(rootTree, newNodeId, callbackObj)
   }

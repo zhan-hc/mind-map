@@ -2,14 +2,15 @@ import type { RaphaelPaper, RaphaelElement, RaphaelReadAttributes, RaphaelSet } 
 import { changeIconDisabled, getCenterXY } from '../../utils/common'
 import { getNodeCenterPosition, getNodeIconPosition,  getNodeLevel,  getNodeRectAttr, getNodeRectBorder, getNodeRectInfo, getNodeTextAttr, setNodeRectAttr } from '../../utils/nodeUtils'
 import { NodeWidthHeight, dragNodeInfo, iconList } from '../../constant'
-import Node, { dragAreaOption, shapeAttr } from '../node/node';
+import Node from '../node/node';
 import { Paper } from '../paper';
 import DrawGenerator, { rectData } from './drawGenerator';
 import { DRAW_CALLBACK_TYPE } from './type';
 import { Viewport } from '../paper/viewport';
 import Position, { connectPositionOption, insertAreaOption } from '../position';
-import { NodeLevel, NodeType, NodeTypeId } from '../node/helper';
+import { NodeLevel, NodeTypeId } from '../node/helper';
 import { DEFAULT_LINE_WIDTH, DRAG_PLACEHOLDER_LINE, DRAG_PLACEHOLDER_RECT, DRAG_START_CUR_RECT, NONE_BORDER } from '../../constant/attr';
+import EditTopic from '../operate/editTopic';
 export class DrawRender {
   private readonly paper: RaphaelPaper;
   private readonly drawGenerator: DrawGenerator;
@@ -17,6 +18,7 @@ export class DrawRender {
   public checkNode: Node | null; // 当前选中节点
   private checkBorder: RaphaelElement | null; // 选中的边框
   private dragInsertEle: RaphaelSet | null; // 拖拽可插入的区域显示
+  private editTopic: EditTopic | null; // 编辑
   public constructor(paper: Paper) {
     this.paper = paper.getPaper()
     this.drawGenerator = paper.getDrawGenertator()
@@ -24,6 +26,7 @@ export class DrawRender {
     this.checkNode = null
     this.checkBorder = null
     this.dragInsertEle = null
+    this.editTopic = null
   }
 
   // 绘制节点
@@ -74,7 +77,9 @@ export class DrawRender {
 
   // 绘制选中的矩形
   public drawCheckRect (node: Node) {
-    return this.drawGenerator.drawRect(getNodeRectBorder(node, 5, 4), setNodeRectAttr( 2, '#3498db') as RaphaelReadAttributes)
+    const checkRect = this.drawGenerator.drawRect(getNodeRectBorder(node, 5, 4), setNodeRectAttr( 2, '#3498db') as RaphaelReadAttributes)
+    checkRect.toFront()
+    return checkRect
   }
 
   // 绘制最顶层的矩形节点(即悬浮可点击节点)
@@ -87,13 +92,18 @@ export class DrawRender {
     const wrapRect = this.drawGenerator.drawRect(getNodeRectBorder(node, 5, 4), getNodeRectAttr(node, 1) as RaphaelReadAttributes, data)
 
     // 点击事件
-    wrapRect.click(function () {
-      that.checkNode = this.data(data.key)
-      // 更新操作栏的图标状态
-      changeIconDisabled(that.checkNode as Node, iconList)
-      // 选中当前节点
-      that.checkBorder?.remove()
-      that.checkBorder = that.drawCheckRect(node)
+    wrapRect.click(function (e) {
+      // 编辑的时候触发了点击则失焦
+      if (that.editTopic?.editStatus) {
+        that.editTopic.editInput?.blur()
+      }
+      that.changeCheckTopic(this, node)
+      // that.checkNode = this.data(data.key)
+      // // 更新操作栏的图标状态
+      // changeIconDisabled(that.checkNode as Node, iconList)
+      // // 选中当前节点
+      // that.checkBorder?.remove()
+      // that.checkBorder = that.drawCheckRect(node)
     })
 
     // 拖拽事件
@@ -101,71 +111,82 @@ export class DrawRender {
       const position = new Position()
       let insertArea: insertAreaOption | null = null;
 
-      wrapRect.drag(function onmove (x, y, cx, cy, e) {
-        const node = this.data('node')
-        if (node.id === NodeTypeId.root) {
-          return
-        }
-        // 拖拽的节点设置红色虚线框
-        node.shape.attr(DRAG_START_CUR_RECT)
-        const list = position.getNodeInsertArea(cb[NodeTypeId.root], [], node)
-        // 拖拽的时候生成可插入区域
-        // list.forEach((item:any) => {
-        //   const aa = that.drawGenerator.drawRect({x: item.area.x,y:item.area.y,width: item.area.x2 - item.area.x, height: item.area.y2-item.area.y,radius: 0}, {fill: '#fff8dc'} as any)
-        //   aa.toBack()
-        // })
+      wrapRect.drag(
+        function onmove (x, y, cx, cy, e) {
+          const node = this.data('node')
+          if (node.id === NodeTypeId.root) {
+            return
+          }
+          // 拖拽的节点设置红色虚线框
+          node.shape.attr(DRAG_START_CUR_RECT)
+          const list = position.getNodeInsertArea(cb[NodeTypeId.root], [], node)
+          // 拖拽的时候生成可插入区域
+          // list.forEach((item:any) => {
+          //   const aa = that.drawGenerator.drawRect({x: item.area.x,y:item.area.y,width: item.area.x2 - item.area.x, height: item.area.y2-item.area.y,radius: 0}, {fill: '#fff8dc'} as any)
+          //   aa.toBack()
+          // })
 
-        const dragId = that.dragInsertEle && that.dragInsertEle.data('dragId')
-        // 获取拖拽鼠标坐标所在的插入区域
-        for (let i = 0;i<list.length;i++) {
-          if (cx > list[i].area.x && cy > list[i].area.y && cx <= list[i].area.x2 && cy <= list[i].area.y2) {
-            insertArea = list[i]
-            break;
+          const dragId = that.dragInsertEle && that.dragInsertEle.data('dragId')
+          // 获取拖拽鼠标坐标所在的插入区域
+          for (let i = 0;i<list.length;i++) {
+            if (cx > list[i].area.x && cy > list[i].area.y && cx <= list[i].area.x2 && cy <= list[i].area.y2) {
+              insertArea = list[i]
+              break;
+            }
+          }
+          // 如果拖拽区域与上次是同个区域
+          if (that.dragInsertEle && dragId === insertArea?.id) {
+            console.log('xiangtongquyu ')
+            return
+          }
+          if (insertArea) {
+            that.dragInsertEle?.remove()
+            that.dragInsertEle = that.drawDragRect(insertArea, {key: 'dragId', value: insertArea.id})
+          }
+        },
+        function onstart (x,y,e) {
+          const node = this.data('node')
+          console.log('onstart', node)
+          // 编辑的时候触发了点击则失焦
+          if (that.editTopic?.editStatus) {
+            that.editTopic.editInput?.blur()
+          }
+          that.changeCheckTopic(this, node)
+        },
+        function onend (e) {
+          const dragId = that.dragInsertEle && that.dragInsertEle.data('dragId')
+          if (that.dragInsertEle && dragId === insertArea?.id) {
+            return
+          }
+          that.dragInsertEle?.remove()
+          const node = this.data('node')
+          node.shape.attr(NONE_BORDER)
+          if (insertArea) {
+            // 删除该节点
+            node.father.removeChild(node)
+            // 对其父节点的子节点sort重新设值
+            node.father.sortChild()
+            // 拖拽的节点更改父节点
+            node.setFather(insertArea.father)
+            // 拖拽的节点更改节点sort
+            node.setSort(insertArea.insertIndex)
+            // 拖拽的节点更改属性
+            node.setAttr({
+              ...node.attr,
+              width: NodeWidthHeight[getNodeLevel(node)].width,
+              height: NodeWidthHeight[getNodeLevel(node)].height,
+              lineStartX: null,
+              lineStartY: null
+            })
+            // 给node的插入的父节点插入node
+            insertArea.father.pushChild(node)
+            // 并重新排序
+            insertArea.father.insertSortChild(node)
+            cb[DRAW_CALLBACK_TYPE.DRAG]()
+            insertArea = null
           }
         }
-        // 如果拖拽区域与上次是同个区域
-        if (that.dragInsertEle && dragId === insertArea?.id) {
-          console.log('xiangtongquyu ')
-          return
-        }
-        if (insertArea) {
-          that.dragInsertEle?.remove()
-          that.dragInsertEle = that.drawDragRect(insertArea, {key: 'dragId', value: insertArea.id})
-        }
-      }, function onstart (x,y,e) {
-      }, function onend (e) {
-        const dragId = that.dragInsertEle && that.dragInsertEle.data('dragId')
-        if (that.dragInsertEle && dragId === insertArea?.id) {
-          return
-        }
-        that.dragInsertEle?.remove()
-        const node = this.data('node')
-        node.shape.attr(NONE_BORDER)
-        if (insertArea) {
-          // 删除该节点
-          node.father.removeChild(node)
-          // 对其父节点的子节点sort重新设值
-          node.father.sortChild()
-          // 拖拽的节点更改父节点
-          node.setFather(insertArea.father)
-          // 拖拽的节点更改节点sort
-          node.setSort(insertArea.insertIndex)
-          // 拖拽的节点更改属性
-          node.setAttr({
-            ...node.attr,
-            width: NodeWidthHeight[getNodeLevel(node)].width,
-            height: NodeWidthHeight[getNodeLevel(node)].height,
-            lineStartX: null,
-            lineStartY: null
-          })
-          // 给node的插入的父节点插入node
-          insertArea.father.pushChild(node)
-          // 并重新排序
-          insertArea.father.insertSortChild(node)
-          cb[DRAW_CALLBACK_TYPE.DRAG]()
-          insertArea = null
-        }
-      })
+      )
     }
 
     wrapRect.hover(function(){wrapRect.attr(setNodeRectAttr( 2, '#87ceeb'))}, function(){wrapRect.attr(NONE_BORDER)})
@@ -256,8 +277,19 @@ export class DrawRender {
     return containerDom
   }
 
-  public getCheckNode () {
-    return this.checkNode
+  // 改变选中的节点
+  public changeCheckTopic(that: RaphaelElement, node: Node) {
+    this.checkNode = that.data('node')
+      // 更新操作栏的图标状态
+      changeIconDisabled(this.checkNode as Node, iconList)
+      // 选中当前节点
+      this.checkBorder?.remove()
+      this.checkBorder = this.drawCheckRect(node)
+      console.log(this.checkBorder, 'changeCheckTopic')
+  }
+
+  public setEditTopic (edit: EditTopic) {
+    this.editTopic = edit
   }
 
   public clear(): void {

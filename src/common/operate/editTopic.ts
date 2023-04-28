@@ -8,8 +8,8 @@ import Node from "../node/node";
 
 class EditTopic {
   private editWrap: HTMLElement | null;
-  private editInput: HTMLElement | null;
-  private editStatus: boolean;
+  private _editInput: HTMLElement | null;
+  private _editStatus: boolean;
   public constructor ({
     wrapName,
     inputName
@@ -19,10 +19,14 @@ class EditTopic {
   }) {
     const { editWrap, editInput } = this.getEditEle(wrapName, inputName)
     this.editWrap = editWrap
-    this.editInput = editInput
-    this.editStatus = false
+    this._editInput = editInput
+    this._editStatus = false
     document.addEventListener('keydown', this.EventKeydown.bind(this))
   }
+
+  
+  public get editStatus () { return this._editStatus }
+  public get editInput () { return this._editInput }
 
   public getEditEle (wrapName: string, inputName: string) {
     const editWrap = document.querySelector(wrapName) as HTMLElement
@@ -42,9 +46,9 @@ class EditTopic {
     this.editWrap.style.left = `${checkNode.attr.x * 1 + 15}px`;
     this.editWrap.style.height = NodeFontSize[getNodeLevel(checkNode)];
     this.showEditWrap()
-    this.editInput && (this.editInput.innerText = checkNode.text);
-    this.editInput?.focus()
-    this.editStatus = true
+    this._editInput && (this._editInput.innerText = checkNode.text);
+    this._editInput?.focus()
+    this._editStatus = true
   }
 
   private hideEditWrap () {
@@ -56,27 +60,24 @@ class EditTopic {
   }
 
   // 失焦事件
-  public addEventBlus (drawRender: Ref<DrawRender | null>, callback: Function) {
-    const _that = this
-    this.editInput?.addEventListener('blur',function(e){
-      const checkNode = drawRender.value?.checkNode as Node
-      const target = e.target as HTMLElement;
-      _that.hideEditWrap()
-      // 设置选中节点的宽高
-      checkNode.setAttr({
-        ...checkNode.attr,
-        width: getTextWidth(checkNode, target.innerText) + NodeTextPadding[getNodeLevel(checkNode)] * 2
-      })
-      checkNode.setText(target.innerText);
-      _that.editStatus = true
-      if (callback) callback();
+  public addEventBlus (e: Event, drawRender: Ref<DrawRender | null>, callback?: Function) {
+    const checkNode = drawRender.value?.checkNode as Node
+    const target = e.target as HTMLElement;
+    this.hideEditWrap()
+    // 设置选中节点的宽高
+    checkNode.setAttr({
+      ...checkNode.attr,
+      width: getTextWidth(checkNode, target.innerText) + NodeTextPadding[getNodeLevel(checkNode)] * 2
     })
+    checkNode.setText(target.innerText);
+    this._editStatus = false
+    if (callback) callback();
   }
 
   // 回车事件
   public EventKeydown (e: KeyboardEvent) {
     if (e.code === 'Enter') {
-      this.editInput?.blur()
+      this._editInput?.blur()
     }
   }
 }

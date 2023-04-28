@@ -33,8 +33,8 @@ import EditTopic from './common/operate/editTopic';
   }
 
   // 节点编辑失焦事件
-  function handleEditBlur () {
-    editTopic && (editTopic as EditTopic).addEventBlus(drawRender, () => reDraw())
+  function handleEditBlur (e: Event) {
+    editTopic && (editTopic as EditTopic).addEventBlus(e, drawRender, () => reDraw())
   }
 
   // 缩放
@@ -48,7 +48,7 @@ import EditTopic from './common/operate/editTopic';
       wrapName: '.edit-wrap',
       inputName: '.edit-text'
     })
-    handleEditBlur()
+    drawRender.value?.setEditTopic(editTopic)
   })
 
 
@@ -58,7 +58,7 @@ import EditTopic from './common/operate/editTopic';
   <operate @handleOperate="handleOperateFunc" :iconList="iconList"></operate>
   <div id="paper" style="width:100vw;height:100vh;">
     <div class="edit-wrap">
-      <div class="edit-text" contenteditable="true"></div>
+      <div class="edit-text" contenteditable="true" @blur="handleEditBlur"></div>
     </div>
   </div>
   <scale :ratio="ratio" @handleZoom="handleZoomFunc"></scale>
@@ -66,6 +66,7 @@ import EditTopic from './common/operate/editTopic';
 
 <style scoped>
 .edit-wrap {
+  z-index: 999;
   display: none;
   position: absolute;
   top: 1500px;
