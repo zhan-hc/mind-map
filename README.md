@@ -19,7 +19,4 @@ If the standalone TypeScript plugin doesn't feel fast enough to you, Volar has a
 
 
 // 已存在bug
-点击其他地方要取消选中
 缩放之后输入框位置问题
-脱拽边界问题
-编辑点击到其他topic，会导致更改内容到点击的topic

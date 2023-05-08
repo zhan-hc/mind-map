@@ -23,15 +23,19 @@ export function getTextWidth(node: Node, str = '') {
 }
 
 // 改变操作icon的disabled属性
-export function changeIconDisabled (checkNode: NodeOptions, iconList: operateOption[]) {
+export function changeIconDisabled (checkNode: NodeOptions | null, iconList: operateOption[]) {
   // 如果是根节点不能添加兄弟节点和删除节点
-  if (checkNode.id === NodeTypeId.root) {
+  if (checkNode !== null && checkNode.id === NodeTypeId.root) {
     iconList.forEach(item => {
       if (![operateType.addTopic, operateType.delTopic].includes(item.type)) {
         item.disabled = false
       } else {
         item.disabled = true
       }
+    })
+  } else if (checkNode === null) {
+    iconList.forEach(item => {
+      item.disabled = true
     })
   } else {
     iconList.forEach(item => {

@@ -28,6 +28,7 @@ export class DrawRender {
     this.checkBorder = null
     this.dragInsertEle = null
     this.editTopic = null
+    paper.getPaperElement().addEventListener('click', this.paperClick.bind(this))
   }
 
   // 绘制节点
@@ -93,6 +94,7 @@ export class DrawRender {
 
     // 点击事件
     wrapRect.click(function (e) {
+      e.stopPropagation()
       // 编辑的时候触发了点击则失焦
       if (that.editTopic?.editStatus) {
         that.editTopic.editInput?.blur()
@@ -287,6 +289,13 @@ export class DrawRender {
 
   public setEditTopic (edit: EditTopic) {
     this.editTopic = edit
+  }
+
+  public paperClick (e: Event) {
+    e.preventDefault()
+    changeIconDisabled(null, iconList)
+    this.checkBorder?.remove()
+    this.checkNode = null
   }
 
   public clear(): void {
