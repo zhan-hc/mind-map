@@ -14,7 +14,7 @@ import EditTopic from './common/operate/editTopic';
   const callbackObject: any = {}
   let editTopic: EditTopic | null = null
   const { handleOperate } = useOperate()
-  const { drawRender, reDraw } = useDraw()
+  const { drawRender, initPaper, reDraw } = useDraw()
   const { ratio, changeRatio } = useScale()
 
   // 节点操作点击事件
@@ -23,7 +23,7 @@ import EditTopic from './common/operate/editTopic';
       reDraw(id)
     }
     callbackObject[operateTotalType.EDIT] = () => {
-      editTopic?.editText(drawRender.value?.checkNode as Node)
+      editTopic?.editText(drawRender.value?.checkNode as Node, ratio)
     }
 
     callbackObject[operateTotalType.DELETE] = () => {
@@ -39,11 +39,13 @@ import EditTopic from './common/operate/editTopic';
 
   // 缩放
   function handleZoomFunc (type: 0|1) {
-    const viewPort = drawRender.value?.viewport as Viewport
-    changeRatio(type, viewPort)
+    changeRatio(type, drawRender.value?.viewport as Viewport)
   }
 
   onMounted(() => {
+    initPaper({
+      ratio
+    })
     editTopic = new EditTopic({
       wrapName: '.edit-wrap',
       inputName: '.edit-text'

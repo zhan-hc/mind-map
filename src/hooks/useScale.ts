@@ -3,19 +3,9 @@ import { Viewport } from '../common/paper/viewport'
 export default function () {
   const ratio = ref(100)
 
-  function changeRatio (type: 1|0, viewPort: Viewport) {
-    const coef = viewPort.getScaleOption().coef
-    const maxSize = viewPort.getScaleMaxSize() * 100
-    const minSize = viewPort.getScaleMinSize() * 100
-    if (type) {
-      viewPort.onScale(120)
-      const newRatio = (ratio.value + coef * 100)
-      ratio.value = newRatio > maxSize ? maxSize: newRatio
-    } else {
-      viewPort.onScale(-120)
-      const newRatio = (ratio.value - coef * 100)
-      ratio.value = newRatio < minSize ? minSize: newRatio
-    }
+  function changeRatio (type: 1|0, viewport: Viewport) {
+    viewport.onScale(type ? 1 : -1)
+    viewport.changeRatio(type)
   }
 
   return {

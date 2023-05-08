@@ -5,12 +5,13 @@ import { NodeWidthHeight, dragNodeInfo, iconList } from '../../constant'
 import Node from '../node/node';
 import { Paper } from '../paper';
 import DrawGenerator, { rectData } from './drawGenerator';
-import { DRAW_CALLBACK_TYPE } from './type';
+import { DRAW_CALLBACK_TYPE, ExtraOption } from './type';
 import { Viewport } from '../paper/viewport';
 import Position, { connectPositionOption, insertAreaOption } from '../position';
 import { NodeLevel, NodeTypeId } from '../node/helper';
 import { DEFAULT_LINE_WIDTH, DRAG_PLACEHOLDER_LINE, DRAG_PLACEHOLDER_RECT, DRAG_START_CUR_RECT, NONE_BORDER } from '../../constant/attr';
 import EditTopic from '../operate/editTopic';
+import { ref } from 'vue';
 export class DrawRender {
   private readonly paper: RaphaelPaper;
   private readonly drawGenerator: DrawGenerator;
@@ -19,10 +20,10 @@ export class DrawRender {
   private checkBorder: RaphaelElement | null; // 选中的边框
   private dragInsertEle: RaphaelSet | null; // 拖拽可插入的区域显示
   private editTopic: EditTopic | null; // 编辑
-  public constructor(paper: Paper) {
+  public constructor(paper: Paper, option?: ExtraOption) {
     this.paper = paper.getPaper()
     this.drawGenerator = paper.getDrawGenertator()
-    this.viewport = new Viewport(paper)
+    this.viewport = new Viewport(paper, option?.ratio || ref(0))
     this.checkNode = null
     this.checkBorder = null
     this.dragInsertEle = null
@@ -136,7 +137,6 @@ export class DrawRender {
           }
           // 如果拖拽区域与上次是同个区域
           if (that.dragInsertEle && dragId === insertArea?.id) {
-            console.log('xiangtongquyu ')
             return
           }
           if (insertArea) {
@@ -146,7 +146,6 @@ export class DrawRender {
         },
         function onstart (x,y,e) {
           const node = this.data('node')
-          console.log('onstart', node)
           // 编辑的时候触发了点击则失焦
           if (that.editTopic?.editStatus) {
             that.editTopic.editInput?.blur()
@@ -285,7 +284,6 @@ export class DrawRender {
       // 选中当前节点
       this.checkBorder?.remove()
       this.checkBorder = this.drawCheckRect(node)
-      console.log(this.checkBorder, 'changeCheckTopic')
   }
 
   public setEditTopic (edit: EditTopic) {

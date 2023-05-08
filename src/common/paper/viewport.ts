@@ -1,3 +1,4 @@
+import { Ref, reactive, ref } from 'vue';
 import { Paper } from '.';
 import { VIEWPORT_SIZE } from '../../constant';
 import { getAssetsFile } from '../../utils/common';
@@ -12,6 +13,7 @@ interface scaleOption {
 }
 export class Viewport {
   private readonly paper: Paper;
+  private ratio:  Ref<number>;
   private scale: scaleOption;
   private maxSize: number; // 允许放大的最大倍数
   private minSize: number; // 允许缩小的最大倍数
@@ -20,8 +22,10 @@ export class Viewport {
   private lastMouseLocation: any; // 鼠标上次的坐标
   private mouseDown: boolean; // 鼠标是否是按住状态
   private keyDown: boolean; // 空格键盘是否是按住状态
-  public constructor(paper: Paper) {
+  public changeRatio: Function; // 空格键盘是否是按住状态
+  public constructor(paper: Paper, ratio: Ref<number>) {
     this.paper = paper
+    this.ratio = ratio
     this.maxSize = VIEWPORT_SIZE.MAX;
     this.minSize = VIEWPORT_SIZE.MIN;
     this.paperWidth = this.paper.getPaperElement().clientWidth;
@@ -31,6 +35,7 @@ export class Viewport {
     this.mouseDown = false;
     this.keyDown = false;
     this.init()
+    this.changeRatio = this._changeRatio.bind(this)
   }
 
   private init () {
@@ -56,12 +61,14 @@ export class Viewport {
   }
 
   public onMouseWheeling(e:any) {
-    if(e.wheelDelta && e.ctrlKey){ // IE/Opera/Chrome
+    if((e.wheelDelta > 0 || e.detail < 0) && e.ctrlKey){
       e.returnValue = false;
-      this.onScale(e.wheelDelta)
-     }else if(e.detail){ // Firefox or others
+      this.onScale(1)
+      this.changeRatio(1)
+     } else {
       e.returnValue = false;
-      this.onScale( -e.detail)
+      this.onScale(-1)
+      this.changeRatio(0)
      }
   }
 
@@ -130,6 +137,18 @@ export class Viewport {
   public onKeyup (e: KeyboardEvent) {
     this.keyDown = false;
     this.paper.getPaperElement().style.cursor = 'default';
+  }
+  private _changeRatio (type: 0|1) {
+    const maxSize = this.maxSize * 100
+    const minSize = this.minSize * 100
+    const coef = this.scale.coef * 100
+    if (type) {
+      const newRatio = this.ratio.value + coef
+      this.ratio.value = newRatio > maxSize ? maxSize: newRatio
+    } else {
+      const newRatio = this.ratio.value - coef
+      this.ratio.value = newRatio < minSize ? minSize: newRatio
+    }
   }
 
   public getScaleOption () {
