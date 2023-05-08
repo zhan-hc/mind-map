@@ -61,7 +61,8 @@ export class Viewport {
   }
 
   public onMouseWheeling(e:any) {
-    if((e.wheelDelta > 0 || e.detail < 0) && e.ctrlKey){
+    if (e.ctrlKey) {
+      if((e.wheelDelta > 0 || e.detail < 0)){
       e.returnValue = false;
       this.onScale(1)
       this.changeRatio(1)
@@ -70,6 +71,7 @@ export class Viewport {
       this.onScale(-1)
       this.changeRatio(0)
      }
+    }
   }
 
   public onScale (dtl: number) {
