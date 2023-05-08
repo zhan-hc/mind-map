@@ -79,7 +79,6 @@ export class DrawRender {
   // 绘制选中的矩形
   public drawCheckRect (node: Node) {
     const checkRect = this.drawGenerator.drawRect(getNodeRectBorder(node, 5, 4), setNodeRectAttr( 2, '#3498db') as RaphaelReadAttributes)
-    checkRect.toFront()
     return checkRect
   }
 

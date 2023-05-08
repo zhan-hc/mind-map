@@ -89,11 +89,11 @@ export class Viewport {
     }
 
     //计算新的视图参数
-    var w = this.paperWidth / this.scale.zoom;
-    var h = this.paperHeight / this.scale.zoom;
-    var lastCenterPoint = this.getLastCenterPoint();
-    var x = lastCenterPoint.x - w / 2;
-    var y = lastCenterPoint.y - h / 2;
+    const w = this.paperWidth / this.scale.zoom;
+    const h = this.paperHeight / this.scale.zoom;
+    const lastCenterPoint = this.getLastCenterPoint();
+    const x = lastCenterPoint.x - w / 2;
+    const y = lastCenterPoint.y - h / 2;
 
     this.updateScale(x, y, w, h);
     this.paper.getPaper().setViewBox(x, y, w, h, false);
