@@ -102,6 +102,9 @@ export class Viewport {
   }
 
   public onMouseDown (e: MouseEvent) {
+    if (this.keyDown) {
+      e.preventDefault()
+    }
     this.mouseDown = true
     this.lastMouseLocation.x = e.clientX;
     this.lastMouseLocation.y = e.clientY;
