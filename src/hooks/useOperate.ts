@@ -1,8 +1,10 @@
 import { Ref } from 'vue'
 import { operateTotalType, operateType } from '../utils/type'
-import { iconList } from '../constant'
-import Node, { createNode, getChildNodeData } from '../common/node/node'
+import { iconList, textPadding } from '../constant'
+import Node, { ImageData, createNode, getChildNodeData } from '../common/node/node'
 import { DrawRender } from '../common/draw/drawRender'
+import AddImage from '../common/operate/addImage'
+import { getTextWidth } from '../utils/common'
 export default function () {
 
   const changeDisable = (type: operateType, value: boolean) => {
@@ -25,6 +27,20 @@ export default function () {
     // 编辑节点
     else if (type === operateType.editTopic) {
       callbackObject[operateTotalType.EDIT] && callbackObject[operateTotalType.EDIT]()
+    }
+    // 添加图片
+    else if (type === operateType.addImage) {
+      const img = new AddImage()
+      img.chooseImage((img: ImageData) => {
+        checkNode.setImageData(img)
+        const { height } = checkNode.attr
+        checkNode.setAttr({
+          ...checkNode.attr,
+          height: img.height > height ? (img.height + textPadding * 2) : height,
+          width: img.width + getTextWidth(checkNode, checkNode.text) + textPadding * 3
+        })
+        callbackObject[operateTotalType.IMG] && callbackObject[operateTotalType.IMG]()
+      })
     }
     // 删除节点
     else if (type === operateType.delTopic) {

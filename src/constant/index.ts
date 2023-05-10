@@ -1,4 +1,3 @@
-import { NodeOptions } from '../common/node/node'
 import { operateType, operateOption } from '../utils/type'
 import { operateIcons } from '../utils/unocss-icon'
 import { reactive } from 'vue'
@@ -22,6 +21,11 @@ export const iconList: operateOption[] = reactive([
     icon: operateIcons[operateType.editTopic],
     disabled: true,
     type: operateType.editTopic
+  },
+  {
+    icon: operateIcons[operateType.addImage],
+    disabled: true,
+    type: operateType.addImage
   },
   {
     icon: operateIcons[operateType.delTopic],

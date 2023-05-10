@@ -20,12 +20,19 @@ export interface NodeOptions {
   sort: number;
   expand: boolean;
   shape?: RaphaelElement;
+  imageData?: ImageData
 }
 
 export interface dragAreaOption {
   id: string;
   father: Node;
   attr: shapeAttr;
+}
+
+export interface ImageData {
+  url: string;
+  width: number;
+  height: number;
 }
 
 class Node {
@@ -36,6 +43,7 @@ class Node {
   private _father: Node | null;
   private _sort: number;
   private _shape: RaphaelElement;
+  private _imageData: ImageData | undefined;
   private _children: Node[];
   public constructor ({
     id,
@@ -44,7 +52,8 @@ class Node {
     attr,
     sort,
     expand,
-    shape
+    shape,
+    imageData
   }: NodeOptions) {
     this._id = id
     this._attr = attr
@@ -54,6 +63,7 @@ class Node {
     this._shape = shape as RaphaelElement
     this._children = []
     this._father = father
+    this._imageData = imageData
   }
 
   public get id() { return this._id; }
@@ -64,6 +74,7 @@ class Node {
   public get expand() { return this._expand; }
   public get shape() { return this._shape }
   public get children() { return this._children; }
+  public get imageData() { return this._imageData; }
 
 
   public clearChild(): void {
@@ -127,6 +138,9 @@ class Node {
   }
   public setFather (node: Node) {
     this._father = node
+  }
+  public setImageData (imageData: ImageData) {
+    this._imageData = imageData
   }
 }
 

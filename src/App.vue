@@ -25,7 +25,9 @@ import EditTopic from './common/operate/editTopic';
     callbackObject[operateTotalType.EDIT] = () => {
       editTopic?.editText(drawRender.value?.checkNode as Node)
     }
-
+    callbackObject[operateTotalType.IMG] = (id: string) => {
+      reDraw(id)
+    }
     callbackObject[operateTotalType.DELETE] = () => {
       reDraw()
     }

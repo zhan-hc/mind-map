@@ -63,11 +63,12 @@ class EditTopic {
   public addEventBlus (e: Event, drawRender: Ref<DrawRender | null>, callback?: Function) {
     const checkNode = drawRender.value?.checkNode as Node
     const target = e.target as HTMLElement;
+    const hasImg = checkNode.imageData && checkNode.imageData.url
     this.hideEditWrap()
     // 设置选中节点的宽高
     checkNode.setAttr({
       ...checkNode.attr,
-      width: getTextWidth(checkNode, target.innerText) + NodeTextPadding[getNodeLevel(checkNode)] * 2
+      width: getTextWidth(checkNode, target.innerText) + NodeTextPadding[getNodeLevel(checkNode)] * (hasImg ? 3 : 2) + (hasImg ? checkNode.imageData?.width : 0)
     })
     checkNode.setText(target.innerText);
     this._editStatus = false

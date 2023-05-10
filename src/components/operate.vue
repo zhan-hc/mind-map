@@ -37,7 +37,7 @@ function handleOperate (item: operateOption): void {
   justify-content: space-between;
   align-items: center;
   height: 50px;
-  width: 200px;
+  width: 250px;
   padding: 0 20px;
   background: #fff;
   transform: translateX(-50%);

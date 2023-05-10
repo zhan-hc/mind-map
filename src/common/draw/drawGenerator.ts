@@ -1,6 +1,7 @@
 import type { RaphaelPaper, RaphaelReadAttributes } from 'raphael';
 import { positionOption, connectPositionOption } from '../position';
 import { EXPAND_CIRCLE } from '../../constant/attr';
+import { ImageData } from '../node/node';
 
 export interface rectOption extends positionOption {
   width: number;
@@ -74,7 +75,7 @@ class DrawGenerator {
     return st
   }
 
-  // 绘制底层的节点块
+  // 绘制矩形
   public drawRect (rectOption: rectOption, attr?: RaphaelReadAttributes, data?: rectData) {
     const rect = this.paper.rect(rectOption.x, rectOption.y, rectOption.width, rectOption.height, rectOption.radius);
     if (attr) {
@@ -84,6 +85,13 @@ class DrawGenerator {
       rect.data(data.key, data.value)
     }
     return rect
+  }
+
+  // 绘制图片
+
+  public drawImage (imgData: ImageData, position: positionOption) {
+    const image = this.paper.image(imgData.url, position.x, position.y, imgData.width, imgData.height);
+    return image
   }
   
 

@@ -1,7 +1,7 @@
 import type { RaphaelPaper, RaphaelElement, RaphaelReadAttributes, RaphaelSet } from 'raphael';
 import { changeIconDisabled, getCenterXY } from '../../utils/common'
 import { getNodeCenterPosition, getNodeIconPosition,  getNodeLevel,  getNodeRectAttr, getNodeRectBorder, getNodeRectInfo, getNodeTextAttr, setNodeRectAttr } from '../../utils/nodeUtils'
-import { NodeWidthHeight, dragNodeInfo, iconList } from '../../constant'
+import { NodeWidthHeight, dragNodeInfo, iconList, textPadding } from '../../constant'
 import Node from '../node/node';
 import { Paper } from '../paper';
 import DrawGenerator, { rectData } from './drawGenerator';
@@ -34,15 +34,31 @@ export class DrawRender {
   // 绘制节点
   public drawTopic (node:Node, checkNodeId: string, callback?: any) {
     const st = this.paper.set()
+    // 矩形节点
     const rect = this.drawGenerator.drawRect(getNodeRectInfo(node, 5), getNodeRectAttr(node, 0) as RaphaelReadAttributes) // 底层节点
-    const text = this.drawGenerator.drawText(getNodeCenterPosition(node), node.text, getNodeTextAttr(node) as RaphaelReadAttributes) // 文本
-    const wrapRect = this.drawWrapRect(node, callback || null)
-    st.push(rect, text, wrapRect)
+    st.push(rect)
+    // 图片
+    const hasImg = node.imageData && node.imageData.url
+    if (hasImg) {
+      const image = this.drawGenerator.drawImage(node.imageData, { x: node.attr.x + textPadding, y: node.attr.y + textPadding } )
+      st.push(image)
+    }
+
+    // 文本
+    const {x, y} = getNodeCenterPosition(node)
+    const text = this.drawGenerator.drawText({ x: x + (hasImg ? (node.imageData.width * 0.5) : 0), y }, node.text, getNodeTextAttr(node) as RaphaelReadAttributes)
+    st.push(text)
+
     // 节点连接线
     const line = this.drawLine(node)
     if (line) {
       st.push(line)
     }
+
+    // 最顶层矩形主要用于hover和click
+    const wrapRect = this.drawWrapRect(node, callback || null)
+    st.push(wrapRect)
+
     if (node.id === NodeTypeId.root) {
       callback[node.id] = node
     }
@@ -100,12 +116,6 @@ export class DrawRender {
         that.editTopic.editInput?.blur()
       }
       that.changeCheckTopic(this, node)
-      // that.checkNode = this.data(data.key)
-      // // 更新操作栏的图标状态
-      // changeIconDisabled(that.checkNode as Node, iconList)
-      // // 选中当前节点
-      // that.checkBorder?.remove()
-      // that.checkBorder = that.drawCheckRect(node)
     })
 
     // 拖拽事件
