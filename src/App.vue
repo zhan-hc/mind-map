@@ -23,7 +23,7 @@ import EditTopic from './common/operate/editTopic';
       reDraw(id)
     }
     callbackObject[operateTotalType.EDIT] = () => {
-      editTopic?.editText(drawRender.value?.checkNode as Node)
+      editTopic?.editText(drawRender.value?.checkNode as Node, ratio)
     }
     callbackObject[operateTotalType.IMG] = (id: string) => {
       reDraw(id)

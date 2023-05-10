@@ -1,5 +1,5 @@
 import { Ref } from "vue";
-import { NodeTextPadding } from "../../constant";
+import { NodeTextPadding, textPadding } from "../../constant";
 import { getTextWidth } from "../../utils/common";
 import { getNodeLevel } from "../../utils/nodeUtils";
 import { DrawRender } from "../draw/drawRender";
@@ -40,11 +40,13 @@ class EditTopic {
     }
   }
 
-  public editText (checkNode: Node) {
+  public editText (checkNode: Node, ratio: Ref<number>) {
     if (!this.editWrap) return
-    this.editWrap.style.top = `${checkNode.attr.y * 1 + 15}px`;
-    this.editWrap.style.left = `${checkNode.attr.x * 1 + 15}px`;
-    this.editWrap.style.height = NodeFontSize[getNodeLevel(checkNode)];
+    const { top, left } = checkNode.shape.node.getBoundingClientRect()
+    this.editWrap.style.top = `${top + textPadding * (ratio.value / 100)}px`;
+    this.editWrap.style.left = `${left + textPadding * (ratio.value / 100)}px`;
+    this.editWrap.style.height = NodeFontSize[getNodeLevel(checkNode)] * (ratio.value / 100) + 'px';
+    console.log(NodeFontSize[getNodeLevel(checkNode)] * (ratio.value / 100), 'height')
     this.showEditWrap()
     this._editInput && (this._editInput.innerText = checkNode.text);
     this._editInput?.focus()

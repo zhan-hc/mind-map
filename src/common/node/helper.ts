@@ -12,9 +12,9 @@ export enum NodeLevel {
   others = 'others'
 }
 export enum NodeFontSize {
-  first = '20px',
-  second = '16px',
-  others = '14px'
+  first = 20,
+  second = 16,
+  others = 14
 }
 
 export enum NodeFillColor {
