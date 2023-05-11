@@ -19,4 +19,4 @@ If the standalone TypeScript plugin doesn't feel fast enough to you, Volar has a
 
 
 // 已存在bug
-缩放之后输入框位置问题
+1. 拖拽报错问题

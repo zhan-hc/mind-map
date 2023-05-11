@@ -107,10 +107,11 @@ export class DrawRender {
       value: node
     }
     const wrapRect = this.drawGenerator.drawRect(getNodeRectBorder(node, 5, 4), getNodeRectAttr(node, 1) as RaphaelReadAttributes, data)
-
     // 点击事件
     wrapRect.click(function (e) {
       e.stopPropagation()
+      // 移动至可视区域
+      that.moveViewArea(this.node)
       // 编辑的时候触发了点击则失焦
       if (that.editTopic?.editStatus) {
         that.editTopic.editInput?.blur()
@@ -306,6 +307,16 @@ export class DrawRender {
     changeIconDisabled(null, iconList)
     this.checkBorder?.remove()
     this.checkNode = null
+  }
+  // 移动至可视区域
+  public moveViewArea (node: SVGRectElement | Element) {
+    // 当元素被遮挡时，让其完全出现可视区域
+    const { top, left, right, bottom } = node.getBoundingClientRect()
+    let moveX = this.viewport.getScaleOption().x;
+    let moveY = this.viewport.getScaleOption().y;
+    const event = [(val: number) => (moveY += val), (val: number) => (moveX += val), (val: number) => (moveX -= val), (val: number) => (moveY -= val)];
+    [top, left, right, bottom].forEach((item, i) => (item < 0 &&  event[i](item))) 
+    this.paper.setViewBox(moveX, moveY, this.viewport.getScaleOption().w, this.viewport.getScaleOption().h, false);
   }
 
   public clear(): void {
