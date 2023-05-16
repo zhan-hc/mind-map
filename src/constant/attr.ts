@@ -26,11 +26,13 @@ const CLICK_COLOR = '#3498db'
 // hover 边框样式
 export const HOVER_RECT_BORDER = {
   'stroke-width': 2,
-  'stroke': HOVER_COLOR
+  'stroke': HOVER_COLOR,
+  'stroke-dasharray': ''
 } as RaphaelReadAttributes
 export const CLICK_RECT_BORDER = {
   'stroke-width': 2,
-  'stroke': CLICK_COLOR
+  'stroke': CLICK_COLOR,
+  'stroke-dasharray': ''
 } as RaphaelReadAttributes
 
 /**
