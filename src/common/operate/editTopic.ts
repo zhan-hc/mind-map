@@ -46,7 +46,6 @@ class EditTopic {
     this.editWrap.style.top = `${top + textPadding * (ratio.value / 100)}px`;
     this.editWrap.style.left = `${left + textPadding * (ratio.value / 100)}px`;
     this.editWrap.style.height = NodeFontSize[getNodeLevel(checkNode)] * (ratio.value / 100) + 'px';
-    console.log(NodeFontSize[getNodeLevel(checkNode)] * (ratio.value / 100), 'height')
     this.showEditWrap()
     this._editInput && (this._editInput.innerText = checkNode.text);
     this._editInput?.focus()
@@ -63,7 +62,7 @@ class EditTopic {
 
   // 失焦事件
   public addEventBlus (e: Event, drawRender: Ref<DrawRender | null>, callback?: Function) {
-    const checkNode = drawRender.value?.checkNode as Node
+    const checkNode = drawRender.value?.data.checkNodeList[0] as Node
     const target = e.target as HTMLElement;
     const hasImg = checkNode.imageData && checkNode.imageData.url
     this.hideEditWrap()

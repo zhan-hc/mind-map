@@ -8,7 +8,7 @@ import useDraw from './hooks/useDraw';
 import useScale from './hooks/useScale';
 import Node from './common/node/node';
 import { iconList } from './constant';
-import { Viewport } from './common/paper/viewport';
+import { Viewport } from './common/viewport'
 import EditTopic from './common/operate/editTopic';
 
   const callbackObject: any = {}
@@ -23,7 +23,7 @@ import EditTopic from './common/operate/editTopic';
       reDraw(id)
     }
     callbackObject[operateTotalType.EDIT] = () => {
-      editTopic?.editText(drawRender.value?.checkNode as Node, ratio)
+      editTopic?.editText(drawRender.value?.data.checkNodeList[0] as Node, ratio)
     }
     callbackObject[operateTotalType.IMG] = (id: string) => {
       reDraw(id)

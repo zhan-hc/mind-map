@@ -1,8 +1,12 @@
-import { Ref, reactive, ref } from 'vue';
-import { Paper } from '.';
-import { VIEWPORT_SIZE } from '../../constant';
-import { getAssetsFile } from '../../utils/common';
-
+import { Ref } from 'vue';
+import { Paper } from './paper';
+import { VIEWPORT_SIZE, iconList } from '../constant';
+import { changeIconDisabled, getAssetsFile } from '../utils/common';
+import type { RaphaelElement, RaphaelReadAttributes } from 'raphael';
+import DrawGenerator from './draw/drawGenerator';
+import { setNodeRectAttr } from '../utils/nodeUtils';
+import Node from './node/node';
+import { HOVER_RECT_BORDER, NONE_BORDER } from '../constant/attr';
 interface scaleOption {
   coef: number; // 每次放大、缩小的增量
   zoom: number; // 目前的大小与原来大小的比例
@@ -10,6 +14,12 @@ interface scaleOption {
   y: number;
   w: number; // 以(x,y)为原点的宽度
   h: number;
+}
+
+export interface vpExtraOption {
+  ratio: Ref<number>;
+  operateStatus: Ref<string>;
+  cb: any
 }
 export class Viewport {
   private readonly paper: Paper;
@@ -22,10 +32,14 @@ export class Viewport {
   private lastMouseLocation: any; // 鼠标上次的坐标
   private mouseDown: boolean; // 鼠标是否是按住状态
   private keyDown: boolean; // 空格键盘是否是按住状态
-  public changeRatio: Function; // 空格键盘是否是按住状态
-  public constructor(paper: Paper, ratio: Ref<number>) {
+  private _checkBox: RaphaelElement | null; // 单击移动生成的选中框
+  private _checkNodeList: Array<Node>;
+  private callBacks: any;
+  private operateStatus: Ref<string>;
+  public changeRatio: Function; // 改变缩放百分比函数
+  public constructor(paper: Paper, option: vpExtraOption) {
     this.paper = paper
-    this.ratio = ratio
+    this.ratio = option?.ratio
     this.maxSize = VIEWPORT_SIZE.MAX;
     this.minSize = VIEWPORT_SIZE.MIN;
     this.paperWidth = this.paper.getPaperElement().clientWidth;
@@ -34,8 +48,12 @@ export class Viewport {
     this.lastMouseLocation = {x: 0, y: 0}
     this.mouseDown = false;
     this.keyDown = false;
-    this.init()
+    this.callBacks = option.cb
+    this._checkBox = null
+    this._checkNodeList = []
+    this.operateStatus = option?.operateStatus
     this.changeRatio = this._changeRatio.bind(this)
+    this.init()
   }
 
   private init () {
@@ -102,31 +120,70 @@ export class Viewport {
   }
 
   public onMouseDown (e: MouseEvent) {
-    if (this.keyDown) {
+    if (this.keyDown || !this.operateStatus.value) {
       e.preventDefault()
     }
     this.mouseDown = true
     this.lastMouseLocation.x = e.clientX;
     this.lastMouseLocation.y = e.clientY;
+    this.callBacks['clearClickStatus']()
   }
 
   public onMouseMove (e: MouseEvent) {
-    if (!this.keyDown) return;
-    if (!this.mouseDown) return;
-    const dx = e.clientX - this.lastMouseLocation.x;
-    const dy = e.clientY - this.lastMouseLocation.y;
+    // if (!this.keyDown) return;
+    // if (!this.mouseDown) return;
+    // 单击移动选中框(没有悬浮在元素中)
+    if (this.mouseDown && !this.keyDown && !this.operateStatus.value) {
+      if (!this._checkBox) {
+        const drawGenerator = new DrawGenerator(this.paper.getPaper())
+        this._checkBox = drawGenerator.drawRect({
+          x: this.lastMouseLocation.x,
+          y: this.lastMouseLocation.y,
+          width: 10,
+          height: 10
+        },
+        HOVER_RECT_BORDER
+        )
+      }
+      const dx = e.clientX - this.lastMouseLocation.x;
+      const dy = e.clientY - this.lastMouseLocation.y;
+      const { x, y } = this._checkBox.getBBox()
+      const boxAttr = {
+        x: dx < 0 ? e.clientX  :  x,
+        y: dy < 0 ? e.clientY : y,
+        width: dx < 0 ? (Math.abs(dx)) :  dx,
+        height: dy< 0 ? (Math.abs(dy)) : dy
+      }
+      this._checkBox.attr(boxAttr)
+      if (this._checkNodeList.length) {
+        this._checkNodeList.forEach(item => item.shape.attr(NONE_BORDER))
+      }
+      this._checkNodeList = this.callBacks['checkBoxEvent'](boxAttr)
+      this.callBacks['setCheckNodeList'](this._checkNodeList)
+      this._checkNodeList.forEach(item => item.shape.attr(setNodeRectAttr( 2, '#3498db')))
+      changeIconDisabled(this._checkNodeList, iconList)
+    }
 
-    const x = this.scale.x - dx;
-    const y = this.scale.y - dy;
+    // 如果空格 + 鼠标按下（拖拽移动）
+    if (this.keyDown && this.mouseDown) {
+      const dx = e.clientX - this.lastMouseLocation.x;
+      const dy = e.clientY - this.lastMouseLocation.y;
 
-    this.updateScale(x, y, this.scale.w, this.scale.h);
-    this.lastMouseLocation.x = e.clientX;
-    this.lastMouseLocation.y = e.clientY;
-    this.paper.getPaper().setViewBox(x, y, this.scale.w, this.scale.h, false);
+      const x = this.scale.x - dx;
+      const y = this.scale.y - dy;
+
+      this.updateScale(x, y, this.scale.w, this.scale.h);
+      this.lastMouseLocation.x = e.clientX;
+      this.lastMouseLocation.y = e.clientY;
+      this.paper.getPaper().setViewBox(x, y, this.scale.w, this.scale.h, false);
+    }
+    
   }
 
   public onMouseUp () {
     this.mouseDown = false
+    this._checkBox?.remove()
+    this._checkBox = null
     // this.lastMouseLocation = {};
   }
 

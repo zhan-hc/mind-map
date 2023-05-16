@@ -1,6 +1,6 @@
 import Raphael from 'raphael'
 import type { RaphaelPaper } from 'raphael';
-import DrawGenerator from '../draw/drawGenerator';
+import DrawGenerator from './draw/drawGenerator';
 export class Paper {
   private readonly paper: RaphaelPaper;
   public readonly drawGenrtator: DrawGenerator;

@@ -7,5 +7,10 @@ export const DRAW_CALLBACK_TYPE = {
 }
 
 export interface ExtraOption {
-  ratio: Ref<number>
+  ratio?: Ref<number> | undefined
+}
+
+export const OPERATE_STATUS = {
+  NULL: '',
+  DRAG: 'drag'
 }

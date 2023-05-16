@@ -16,7 +16,8 @@ export default function () {
   }
 
   function handleOperate (drawRender: Ref<DrawRender | null>, type: operateType, callbackObject?: any) {
-    const checkNode = drawRender.value?.checkNode as Node
+    const checkNodeList = drawRender.value?.data.checkNodeList as Array<Node>
+    const checkNode = checkNodeList[0]
     // 增加节点
     if ([operateType.addTopic, operateType.addSubTopic].includes(type)) {
       const newNode = createNode(getChildNodeData(type, checkNode));
@@ -44,7 +45,7 @@ export default function () {
     }
     // 删除节点
     else if (type === operateType.delTopic) {
-      checkNode.father?.removeChild(checkNode)
+      checkNodeList.forEach(item => item.father?.removeChild(item))
       callbackObject[operateTotalType.DELETE]() && callbackObject[operateTotalType.DELETE]()
     }
   }

@@ -1,5 +1,5 @@
-import Node, { NodeOptions, createNode } from '../node/node'
-import Position from '../position';
+import Node, { NodeOptions, createNode } from './node/node'
+import Position from './position';
 export class Tree {
   private readonly root: Node;
   private readonly position: Position;

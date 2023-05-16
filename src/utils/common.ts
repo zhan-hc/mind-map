@@ -14,7 +14,7 @@ export function getTextWidth(node: Node, str = '') {
   const dom = document.createElement('span');
   const App = document.getElementById('app')
   dom.style.display = 'inline-block';
-  dom.style.fontSize = getNodeInfo(NodeInfo.fontSize, node)
+  dom.style.fontSize = getNodeInfo(NodeInfo.fontSize, node) + 'px'
   dom.textContent = str;
   App?.appendChild(dom);
   const width = dom.clientWidth;
@@ -23,9 +23,23 @@ export function getTextWidth(node: Node, str = '') {
 }
 
 // 改变操作icon的disabled属性
-export function changeIconDisabled (checkNode: NodeOptions | null, iconList: operateOption[]) {
+export function changeIconDisabled (checkNodes: Array<Node> | null, iconList: operateOption[]) {
+  if (checkNodes && !checkNodes.length) return
+  // 当选中多个节点时
+  if (checkNodes && checkNodes?.length > 1) {
+    // 如果多选里面包含根阶段
+    const haveRoot = checkNodes.some(item => item.id === NodeTypeId.root)
+    iconList.forEach(item => {
+      if (haveRoot) {
+        item.disabled = true
+      } else {
+        item.disabled = (item.type === operateType.delTopic ? false : true)
+      }
+    })
+    return
+  }
   // 如果是根节点不能添加兄弟节点和删除节点
-  if (checkNode !== null && checkNode.id === NodeTypeId.root) {
+  if (checkNodes !== null && checkNodes[0].id === NodeTypeId.root) {
     iconList.forEach(item => {
       if (![operateType.addTopic, operateType.delTopic].includes(item.type)) {
         item.disabled = false
@@ -33,7 +47,7 @@ export function changeIconDisabled (checkNode: NodeOptions | null, iconList: ope
         item.disabled = true
       }
     })
-  } else if (checkNode === null) {
+  } else if (checkNodes === null) {
     iconList.forEach(item => {
       item.disabled = true
     })
@@ -58,5 +72,15 @@ export function getCenterXY (x:number, y:number, x2:number, y2:number) {
   return {
     cx,
     cy
+  }
+}
+
+export function forTreeEvent (root: Node, cb: Function) {
+  const len = root.children.length
+  cb(root)
+  if (len) {
+    root.children.forEach(item => {
+      forTreeEvent(item, cb)
+    })
   }
 }

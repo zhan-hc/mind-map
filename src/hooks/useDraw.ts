@@ -1,11 +1,11 @@
-import { onMounted, reactive, Ref, toRefs } from 'vue'
+import { reactive, toRefs } from 'vue'
 import DrawGenerator from "../common/draw/drawGenerator"
 import { DrawRender } from "../common/draw/drawRender"
 import { Paper } from "../common/paper"
 import Position from "../common/position"
-import Tree from "../common/tree/tree"
+import Tree from "../common/tree"
 import { DRAW_CALLBACK_TYPE, ExtraOption } from '../common/draw/type'
-import Node, { getInitData } from '../common/node/node'
+import { getInitData } from '../common/node/node'
 
 interface dataOption {
   tree:  Tree | null,
@@ -20,11 +20,11 @@ export default function () {
     drawGenerator: null,
     drawRender: null
   })
-  function initPaper (options?: ExtraOption) {
+  function initPaper (options: ExtraOption) {
     data.tree = new Tree({data: getInitData()});
     data.paper = new Paper('#paper');
     data.drawGenerator = new DrawGenerator(data.paper.getPaper());
-    data.drawRender = new DrawRender(data.paper, options);
+    data.drawRender = new DrawRender(data.paper, {...options, tree: data.tree});
     reDraw();
   }
 

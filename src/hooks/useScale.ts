@@ -1,5 +1,5 @@
 import { ref } from 'vue'
-import { Viewport } from '../common/paper/viewport'
+import { Viewport } from '../common/viewport'
 export default function () {
   const ratio = ref(100)
 

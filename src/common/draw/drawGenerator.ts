@@ -55,7 +55,7 @@ class DrawGenerator {
   // 绘制图标(展开和收藏图标)1+/0-
   public drawExpandIcon (position: circleOption,data?: rectData, type?: boolean) {
     const st = this.paper.set()
-    const circle = this.drawCircle(position, EXPAND_CIRCLE as RaphaelReadAttributes)
+    const circle = this.drawCircle(position, EXPAND_CIRCLE)
     const horizontalLine = this.drawLine(`M${position.x - (position.radius / 2)} ${position.y}L${position.x + (position.radius / 2)} ${position.y}Z`)
     
     if (type) {

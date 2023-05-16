@@ -28,17 +28,6 @@ export interface insertAreaOption {
   area: areaOption;
   insertIndex: number
 }
-// export interface dragPositionOption {
-//   node: TreeOption;
-//   x: number;
-//   y: number;
-//   x2: number;
-//   y2: number;
-//   cx: number; // 绘制拖拽占位矩形的x
-//   cy: number; // 绘制拖拽占位矩形的y
-//   insertIndex: number;
-//   level: number; // 只是为了遍历时优先选中子区域
-// }
 
 /*
 此图就代表节点之间的连接线的坐标（startXY到leftXY是曲线）

@@ -1,34 +1,52 @@
 import type { RaphaelPaper, RaphaelElement, RaphaelReadAttributes, RaphaelSet } from 'raphael';
-import { changeIconDisabled, getCenterXY } from '../../utils/common'
-import { getNodeCenterPosition, getNodeIconPosition,  getNodeLevel,  getNodeRectAttr, getNodeRectBorder, getNodeRectInfo, getNodeTextAttr, setNodeRectAttr } from '../../utils/nodeUtils'
+import { changeIconDisabled, forTreeEvent, getCenterXY } from '../../utils/common'
+import { getNodeCenterPosition, getNodeIconPosition,  getNodeLevel,  getNodeRectAttr, getNodeRectBorder, getNodeRectInfo, getNodeTextAttr } from '../../utils/nodeUtils'
 import { NodeWidthHeight, dragNodeInfo, iconList, textPadding } from '../../constant'
-import Node from '../node/node';
+import Node, { shapeAttr } from '../node/node';
 import { Paper } from '../paper';
 import DrawGenerator, { rectData } from './drawGenerator';
-import { DRAW_CALLBACK_TYPE, ExtraOption } from './type';
-import { Viewport } from '../paper/viewport';
+import { DRAW_CALLBACK_TYPE, ExtraOption, OPERATE_STATUS } from './type';
+import { Viewport } from '../viewport';
 import Position, { connectPositionOption, insertAreaOption } from '../position';
 import { NodeLevel, NodeTypeId } from '../node/helper';
-import { DEFAULT_LINE_WIDTH, DRAG_PLACEHOLDER_LINE, DRAG_PLACEHOLDER_RECT, DRAG_START_CUR_RECT, NONE_BORDER } from '../../constant/attr';
+import { CLICK_RECT_BORDER, DEFAULT_LINE_WIDTH, DRAG_PLACEHOLDER_LINE, DRAG_PLACEHOLDER_RECT, DRAG_START_CUR_RECT, HOVER_RECT_BORDER, NONE_BORDER } from '../../constant/attr';
 import EditTopic from '../operate/editTopic';
-import { ref } from 'vue';
+import { Ref, reactive, ref } from 'vue';
+import Tree from '../tree';
+export interface Option extends ExtraOption {
+  tree: Tree | null
+}
+interface renderData {
+  checkNodeList: Array<Node> // 选中的边框
+}
 export class DrawRender {
   private readonly paper: RaphaelPaper;
   private readonly drawGenerator: DrawGenerator;
   public viewport: Viewport;
-  public checkNode: Node | null; // 当前选中节点
-  private checkBorder: RaphaelElement | null; // 选中的边框
+  public data: renderData;
+  private tree: Tree | null | undefined; // 树节点
   private dragInsertEle: RaphaelSet | null; // 拖拽可插入的区域显示
   private editTopic: EditTopic | null; // 编辑
-  public constructor(paper: Paper, option?: ExtraOption) {
+  private operateStatus: Ref<string>; // 操作状态
+  public constructor(paper: Paper, option: Option) {
     this.paper = paper.getPaper()
     this.drawGenerator = paper.getDrawGenertator()
-    this.viewport = new Viewport(paper, option?.ratio || ref(0))
-    this.checkNode = null
-    this.checkBorder = null
+    this.operateStatus = ref('')
     this.dragInsertEle = null
     this.editTopic = null
+    this.tree = option.tree
+    this.data = reactive({ checkNodeList: [] })
+    this.viewport = new Viewport(paper, {
+      ratio: option?.ratio || ref(0), 
+      operateStatus: this.operateStatus, 
+      cb: {
+        checkBoxEvent: this.checkBoxEvent.bind(this), // 获取选中框里的node节点
+        clearClickStatus: this.clearClickStatus.bind(this), // 清除选中状态
+        setCheckNodeList: this.setCheckNodeList.bind(this) // 设置checkNodeList的值
+      }
+    })
     paper.getPaperElement().addEventListener('click', this.paperClick.bind(this))
+    this.drawTopic = this.drawTopic.bind(this)
   }
 
   // 绘制节点
@@ -62,13 +80,13 @@ export class DrawRender {
     if (node.id === NodeTypeId.root) {
       callback[node.id] = node
     }
-    node.setShape(rect)
+    node.setShape(wrapRect)
 
     // 如果是新增节点则默认选中新节点
     if (node.id === checkNodeId) {
-      this.checkBorder = this.drawCheckRect(node)
-      this.checkNode = node
-      changeIconDisabled(node, iconList)
+      node.shape.attr(CLICK_RECT_BORDER)
+      this.data.checkNodeList = [node]
+      changeIconDisabled(this.data.checkNodeList, iconList)
     }
 
     if (node.children && node.children.length) {
@@ -93,12 +111,6 @@ export class DrawRender {
     }
   }
 
-  // 绘制选中的矩形
-  public drawCheckRect (node: Node) {
-    const checkRect = this.drawGenerator.drawRect(getNodeRectBorder(node, 5, 4), setNodeRectAttr( 2, '#3498db') as RaphaelReadAttributes)
-    return checkRect
-  }
-
   // 绘制最顶层的矩形节点(即悬浮可点击节点)
   public drawWrapRect (node: Node, cb?: any) {
     const that = this
@@ -112,26 +124,25 @@ export class DrawRender {
       e.stopPropagation()
       // 移动至可视区域
       that.moveViewArea(this.node)
-      // 编辑的时候触发了点击则失焦
+      // // 编辑的时候触发了点击则失焦
       if (that.editTopic?.editStatus) {
         that.editTopic.editInput?.blur()
       }
-      that.changeCheckTopic(this, node)
+      that.changeCheckTopic(node)
     })
-
     // 拖拽事件
     if (cb && cb[DRAW_CALLBACK_TYPE.DRAG]) {
       const position = new Position()
       let insertArea: insertAreaOption | null = null;
-
       wrapRect.drag(
         function onmove (x, y, cx, cy, e) {
+          that.setDragStatus(OPERATE_STATUS.DRAG)
           const node = this.data('node')
           if (node.id === NodeTypeId.root) {
             return
           }
           // 拖拽的节点设置红色虚线框
-          node.shape.attr(DRAG_START_CUR_RECT)
+          node.shape.attr(DRAG_START_CUR_RECT);
           const list = position.getNodeInsertArea(cb[NodeTypeId.root], [], node)
           // 拖拽的时候生成可插入区域
           // list.forEach((item:any) => {
@@ -162,9 +173,10 @@ export class DrawRender {
           if (that.editTopic?.editStatus) {
             that.editTopic.editInput?.blur()
           }
-          that.changeCheckTopic(this, node)
+          that.changeCheckTopic(node)
         },
         function onend (e) {
+          that.setDragStatus(OPERATE_STATUS.NULL)
           const dragId = that.dragInsertEle && that.dragInsertEle.data('dragId')
           if (that.dragInsertEle && dragId === insertArea?.id) {
             return
@@ -199,8 +211,15 @@ export class DrawRender {
         }
       )
     }
-
-    wrapRect.hover(function(){wrapRect.attr(setNodeRectAttr( 2, '#87ceeb'))}, function(){wrapRect.attr(NONE_BORDER)})
+    // 非选中节点才有hover/unhover效果
+    wrapRect.hover(
+      function(){
+        !(that.data.checkNodeList.map(item => item.id).includes(this.data('node').id)) && this.attr(HOVER_RECT_BORDER);
+      },
+      function(){
+        !(that.data.checkNodeList.map(item => item.id).includes(this.data('node').id)) && this.attr(NONE_BORDER);
+      }
+    )
     
     return wrapRect
   }
@@ -225,8 +244,8 @@ export class DrawRender {
       ...dNode.attr,
       radius: dragNodeInfo.radius
     }
-    const rect = this.drawGenerator.drawRect(rectInfo, DRAG_PLACEHOLDER_RECT as RaphaelReadAttributes, data)
-    const line = this.drawLine(dNode, DRAG_PLACEHOLDER_LINE as RaphaelReadAttributes) as RaphaelElement
+    const rect = this.drawGenerator.drawRect(rectInfo, DRAG_PLACEHOLDER_RECT, data)
+    const line = this.drawLine(dNode, DRAG_PLACEHOLDER_LINE) as RaphaelElement
     st.push(rect, line)
     if (data) {
       st.data(data.key, data.value)
@@ -289,34 +308,57 @@ export class DrawRender {
   }
 
   // 改变选中的节点
-  public changeCheckTopic(that: RaphaelElement, node: Node) {
-    this.checkNode = that.data('node')
-      // 更新操作栏的图标状态
-      changeIconDisabled(this.checkNode as Node, iconList)
-      // 选中当前节点
-      this.checkBorder?.remove()
-      this.checkBorder = this.drawCheckRect(node)
+  public changeCheckTopic(node: Node) {
+    this.data.checkNodeList.forEach(item => item.shape.attr(NONE_BORDER))
+    this.data.checkNodeList = [node]
+    // 更新操作栏的图标状态
+    changeIconDisabled(this.data.checkNodeList, iconList)
+    // 选中当前节点
+    node.shape.attr(CLICK_RECT_BORDER)
   }
 
   public setEditTopic (edit: EditTopic) {
     this.editTopic = edit
   }
 
+  public setDragStatus (val: string) {
+    this.operateStatus.value = val
+  }
+
+  public setCheckNodeList (val: Array<Node>) {
+    this.data.checkNodeList = val
+  }
+
   public paperClick (e: Event) {
     e.preventDefault()
     changeIconDisabled(null, iconList)
-    this.checkBorder?.remove()
-    this.checkNode = null
+    this.data.checkNodeList.forEach(item => item.shape.attr(NONE_BORDER))
   }
   // 移动至可视区域
   public moveViewArea (node: SVGRectElement | Element) {
-    // 当元素被遮挡时，让其完全出现可视区域
-    const { top, left, right, bottom } = node.getBoundingClientRect()
-    let moveX = this.viewport.getScaleOption().x;
-    let moveY = this.viewport.getScaleOption().y;
-    const event = [(val: number) => (moveY += val), (val: number) => (moveX += val), (val: number) => (moveX -= val), (val: number) => (moveY -= val)];
-    [top, left, right, bottom].forEach((item, i) => (item < 0 &&  event[i](item))) 
-    this.paper.setViewBox(moveX, moveY, this.viewport.getScaleOption().w, this.viewport.getScaleOption().h, false);
+    // // 当元素被遮挡时，让其完全出现可视区域
+    // const { top, left, right, bottom } = node.getBoundingClientRect()
+    // let moveX = this.viewport.getScaleOption().x;
+    // let moveY = this.viewport.getScaleOption().y;
+    // const event = [(val: number) => (moveY += val), (val: number) => (moveX += val), (val: number) => (moveX -= val), (val: number) => (moveY -= val)];
+    // [top, left, right, bottom].forEach((item, i) => (item < 0 &&  event[i](item)))
+    // this.paper.setViewBox(moveX, moveY, this.viewport.getScaleOption().w, this.viewport.getScaleOption().h, false);
+  }
+
+  public checkBoxEvent (attrs: shapeAttr, nodeList: Array<Node> = []) {
+    const {width, height} = attrs
+    forTreeEvent(this.tree?.getRoot() as Node, (node: Node) => {
+      const { x, y, x2, y2 } = node.shape.getBBox()
+      if (x > attrs.x && y > attrs.y && x2 < attrs.x + width && y2 < attrs.y + height) {
+        nodeList.push(node)
+      }
+    })
+    return nodeList
+  }
+
+  public clearClickStatus () {
+    this.data.checkNodeList.forEach(item => item.shape.attr(NONE_BORDER));
+    changeIconDisabled(null, iconList)
   }
 
   public clear(): void {
