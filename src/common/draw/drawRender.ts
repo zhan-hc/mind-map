@@ -45,7 +45,7 @@ export class DrawRender {
         setCheckNodeList: this.setCheckNodeList.bind(this) // 设置checkNodeList的值
       }
     })
-    paper.getPaperElement().addEventListener('click', this.paperClick.bind(this))
+    // paper.getPaperElement().addEventListener('click', this.paperClick.bind(this))
     this.drawTopic = this.drawTopic.bind(this)
   }
 
@@ -358,7 +358,8 @@ export class DrawRender {
 
   public clearClickStatus () {
     this.data.checkNodeList.forEach(item => item.shape.attr(NONE_BORDER));
-    changeIconDisabled(null, iconList)
+    changeIconDisabled(null, iconList);
+    this.editTopic?.editInput?.blur()
   }
 
   public clear(): void {

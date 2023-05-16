@@ -64,7 +64,7 @@ class EditTopic {
   public addEventBlus (e: Event, drawRender: Ref<DrawRender | null>, callback?: Function) {
     const checkNode = drawRender.value?.data.checkNodeList[0] as Node
     const target = e.target as HTMLElement;
-    const hasImg = checkNode.imageData && checkNode.imageData.url
+    const hasImg = checkNode?.imageData && checkNode.imageData.url
     this.hideEditWrap()
     // 设置选中节点的宽高
     checkNode.setAttr({
