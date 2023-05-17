@@ -29,12 +29,18 @@ export const HOVER_RECT_BORDER = {
   'stroke': HOVER_COLOR,
   'stroke-dasharray': ''
 } as RaphaelReadAttributes
+
 export const CLICK_RECT_BORDER = {
   'stroke-width': 2,
   'stroke': CLICK_COLOR,
   'stroke-dasharray': ''
 } as RaphaelReadAttributes
 
+export const SELECT_RECT = {
+  ...HOVER_RECT_BORDER,
+  fill: '#997cff',
+  'fill-opacity': 0.1
+} as RaphaelReadAttributes
 /**
  * 拖拽相关
  */

@@ -22,6 +22,7 @@ class EditTopic {
     this._editInput = editInput
     this._editStatus = false
     document.addEventListener('keydown', this.EventKeydown.bind(this))
+    this.blurInput = this.blurInput.bind(this)
   }
 
   
@@ -58,6 +59,12 @@ class EditTopic {
 
   private showEditWrap () {
     this.editWrap && (this.editWrap.style.display = 'block')
+  }
+
+  public blurInput () {
+    if (this.editStatus) {
+      this.editInput?.blur()
+    }
   }
 
   // 失焦事件

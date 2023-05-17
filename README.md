@@ -19,4 +19,5 @@ If the standalone TypeScript plugin doesn't feel fast enough to you, Volar has a
 
 
 // 已存在bug
-1. 拖拽报错问题(定位到是moveViewArea方法里的setViewBox引起的，未解决)
+1. 缩放之后单击选择框获取的鼠标位置不对
+2. 当节点被遮挡移动到可视区域（右边界有问题）

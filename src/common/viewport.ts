@@ -1,12 +1,11 @@
 import { Ref } from 'vue';
 import { Paper } from './paper';
 import { VIEWPORT_SIZE, iconList } from '../constant';
-import { changeIconDisabled, getAssetsFile } from '../utils/common';
-import type { RaphaelElement, RaphaelReadAttributes } from 'raphael';
-import DrawGenerator from './draw/drawGenerator';
+import { changeIconDisabled, getAssetsFile, isMobile } from '../utils/common';
+import type { RaphaelElement } from 'raphael';
 import { setNodeRectAttr } from '../utils/nodeUtils';
 import Node from './node/node';
-import { HOVER_RECT_BORDER, NONE_BORDER } from '../constant/attr';
+import { NONE_BORDER, SELECT_RECT } from '../constant/attr';
 interface scaleOption {
   coef: number; // 每次放大、缩小的增量
   zoom: number; // 目前的大小与原来大小的比例
@@ -58,9 +57,9 @@ export class Viewport {
 
   private init () {
     this.paper.getPaper().canvas.addEventListener('mousewheel', this.onMouseWheeling.bind(this))
-    this.paper.getPaper().canvas.addEventListener('mousedown', this.onMouseDown.bind(this) as (e: Event) => void)
-    this.paper.getPaper().canvas.addEventListener('mouseup', this.onMouseUp.bind(this))
-    this.paper.getPaper().canvas.addEventListener('mousemove', this.onMouseMove.bind(this)  as (e: Event) => void)
+    this.paper.getPaper().canvas.addEventListener(isMobile ? 'touchstart' : 'mousedown', this.onMouseDown.bind(this) as (e: Event) => void)
+    this.paper.getPaper().canvas.addEventListener(isMobile ? 'touchend' : 'mouseup', this.onMouseUp.bind(this))
+    this.paper.getPaper().canvas.addEventListener(isMobile ? 'touchmove' : 'mousemove', this.onMouseMove.bind(this)  as (e: Event) => void)
     document.addEventListener('keydown', this.onKeydown.bind(this))
     document.addEventListener('keypress', this.onKeypress.bind(this))
     document.addEventListener('keyup', this.onKeyup.bind(this))
@@ -114,43 +113,43 @@ export class Viewport {
     const lastCenterPoint = this.getLastCenterPoint();
     const x = lastCenterPoint.x - w / 2;
     const y = lastCenterPoint.y - h / 2;
-
     this.updateScale(x, y, w, h);
     this.paper.getPaper().setViewBox(x, y, w, h, false);
   }
 
-  public onMouseDown (e: MouseEvent) {
+  public onMouseDown (e: MouseEvent | TouchEvent) {
     if (this.keyDown || !this.operateStatus.value) {
       e.preventDefault()
     }
     this.mouseDown = true
-    this.lastMouseLocation.x = e.clientX;
-    this.lastMouseLocation.y = e.clientY;
+    this.lastMouseLocation.x = !isMobile ? (e as MouseEvent).clientX : (e as TouchEvent).targetTouches[0].pageX;
+    this.lastMouseLocation.y = !isMobile ? (e as MouseEvent).clientY : (e as TouchEvent).targetTouches[0].pageY;
     this.callBacks['clearClickStatus']()
   }
 
-  public onMouseMove (e: MouseEvent) {
-    // if (!this.keyDown) return;
-    // if (!this.mouseDown) return;
+  public onMouseMove (e: MouseEvent | TouchEvent) {
+    const { clientX, clientY } = {
+      clientX: !isMobile ? (e as MouseEvent).clientX : (e as TouchEvent).targetTouches[0].pageX,
+      clientY: !isMobile ? (e as MouseEvent).clientY : (e as TouchEvent).targetTouches[0].pageY
+    }
     // 单击移动选中框(没有悬浮在元素中)
-    if (this.mouseDown && !this.keyDown && !this.operateStatus.value) {
+    if (!isMobile && this.mouseDown && !this.keyDown && !this.operateStatus.value) {
       if (!this._checkBox) {
-        const drawGenerator = new DrawGenerator(this.paper.getPaper())
-        this._checkBox = drawGenerator.drawRect({
+        this._checkBox = this.paper.getDrawGenertator().drawRect({
           x: this.lastMouseLocation.x,
           y: this.lastMouseLocation.y,
           width: 10,
           height: 10
         },
-        HOVER_RECT_BORDER
+        SELECT_RECT
         )
       }
-      const dx = e.clientX - this.lastMouseLocation.x;
-      const dy = e.clientY - this.lastMouseLocation.y;
+      const dx = clientX - this.lastMouseLocation.x;
+      const dy = clientY - this.lastMouseLocation.y;
       const { x, y } = this._checkBox.getBBox()
       const boxAttr = {
-        x: dx < 0 ? e.clientX  :  x,
-        y: dy < 0 ? e.clientY : y,
+        x: dx < 0 ? clientX  :  x,
+        y: dy < 0 ? clientY : y,
         width: dx < 0 ? (Math.abs(dx)) :  dx,
         height: dy< 0 ? (Math.abs(dy)) : dy
       }
@@ -165,16 +164,16 @@ export class Viewport {
     }
 
     // 如果空格 + 鼠标按下（拖拽移动）
-    if (this.keyDown && this.mouseDown) {
-      const dx = e.clientX - this.lastMouseLocation.x;
-      const dy = e.clientY - this.lastMouseLocation.y;
+    if (isMobile || (this.keyDown && this.mouseDown)) {
+      const dx = clientX - this.lastMouseLocation.x;
+      const dy = clientY - this.lastMouseLocation.y;
 
       const x = this.scale.x - dx;
       const y = this.scale.y - dy;
 
       this.updateScale(x, y, this.scale.w, this.scale.h);
-      this.lastMouseLocation.x = e.clientX;
-      this.lastMouseLocation.y = e.clientY;
+      this.lastMouseLocation.x = clientX;
+      this.lastMouseLocation.y = clientY;
       this.paper.getPaper().setViewBox(x, y, this.scale.w, this.scale.h, false);
     }
     
@@ -182,9 +181,8 @@ export class Viewport {
 
   public onMouseUp () {
     this.mouseDown = false
-    this._checkBox?.remove()
+    this._checkBox?.node.remove()
     this._checkBox = null
-    // this.lastMouseLocation = {};
   }
 
   public onKeydown (e: KeyboardEvent) {

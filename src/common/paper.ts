@@ -5,9 +5,12 @@ export class Paper {
   private readonly paper: RaphaelPaper;
   public readonly drawGenrtator: DrawGenerator;
   public readonly paperEle: HTMLElement;
+  public readonly paperAttr: any;
   public constructor(container: string | Element) {
     this.paperEle = this.getElement(container)
-    this.paper = new Raphael(this.paperEle, this.paperEle.clientWidth, this.paperEle.clientHeight);
+    const [width, height] = [this.paperEle.clientWidth, this.paperEle.clientHeight]
+    this.paper = new Raphael(this.paperEle, width, height);
+    this.paperAttr = { width, height }
     this.drawGenrtator = new DrawGenerator(this.paper)
   }
 
@@ -32,6 +35,10 @@ export class Paper {
 
   public getPaperElement () {
     return this.paperEle
+  }
+
+  public getPaperAttr () {
+    return this.paperAttr
   }
 
   public clear(): void {
