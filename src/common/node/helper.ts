@@ -1,44 +1,40 @@
-export enum NodeType {
-  root = 1,
-  firstLevel,
-  othersChild,
-}
 export enum NodeTypeId {
   root = '1'
+}
+export const NodeInfo: any = {
+  first: {
+    fontSize: 20,
+    fontColor: '#ffffff',
+    fillColor: '#3f89de',
+    textPadding: 18,
+    attr: {
+      width: 120,
+      height: 60
+    }
+  },
+  second: {
+    fontSize: 16,
+    fontColor: '#000000',
+    fillColor: '#f5f5f5',
+    textPadding: 16,
+    attr: {
+      width: 100,
+      height: 50
+    }
+  },
+  others: {
+    fontSize: 14,
+    fontColor: '#000000',
+    fillColor: 'transparent',
+    textPadding: 12,
+    attr: {
+      width: 80,
+      height: 40
+    }
+  }
 }
 export enum NodeLevel {
   first = 'first',
   second = 'second',
   others = 'others'
 }
-export enum NodeFontSize {
-  first = 20,
-  second = 16,
-  others = 14
-}
-
-export enum NodeFillColor {
-  first = '#3f89de',
-  second = '#f5f5f5',
-  others = 'transparent'
-}
-
-export enum NodeFontColor {
-  first = '#ffffff',
-  second = '#000000',
-  others = '#000000'
-}
-
-export enum createType {
-  topic = 0,
-  subTopic = 1
-}
-
-export enum NodeInfo {
-  fillColor,
-  fontSize,
-  fontColor,
-  NodeTextPadding
-}
-
-export const NodeInfoList = [NodeFillColor, NodeFontSize, NodeFontColor] 

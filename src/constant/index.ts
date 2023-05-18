@@ -34,26 +34,6 @@ export const iconList: operateOption[] = reactive([
   }
 ])
 
-export const NodeWidthHeight = {
-  first: {
-    width: 120,
-    height: 60
-  },
-  second: {
-    width: 100,
-    height: 50
-  },
-  others: {
-    width: 80,
-    height: 40
-  }
-}
-
-export const NodeTextPadding =  {
-  first: 18,
-  second: 16,
-  others: 12
-}
 
 export const dragNodeInfo = {
   width: 60,

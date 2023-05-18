@@ -1,6 +1,6 @@
-import { NodeWidthHeight } from '../constant/index';
 import { moduleInterval, modulePadding } from '../constant/index'
 import { randomId } from '../utils/common';
+import { NodeInfo } from './node/helper';
 import Node from './node/node';
 
 export interface positionOption {
@@ -150,7 +150,7 @@ class Position {
             areaList.unshift({
               id: randomId(),
               father: item,
-              area: { x: itemStartX, y: item.shape.getBBox().y, x2: itemStartX + NodeWidthHeight.others.width, y2: item.shape.getBBox().y2 },
+              area: { x: itemStartX, y: item.shape.getBBox().y, x2: itemStartX + NodeInfo.others.attr.width, y2: item.shape.getBBox().y2 },
               insertIndex: 0
             })
           }

@@ -1,7 +1,7 @@
-import { NodeTextPadding, textPadding } from "../../constant";
+import { textPadding } from "../../constant";
 import { getTextWidth } from "../../utils/common";
 import { getNodeLevel } from "../../utils/nodeUtils";
-import { NodeFontSize } from "../node/helper";
+import { NodeInfo } from "../node/helper";
 import Node from "../node/node";
 
 class EditTopic {
@@ -44,7 +44,7 @@ class EditTopic {
     const { top, left } = checkNode.shape.node.getBoundingClientRect()
     this.editWrap.style.top = `${top + textPadding * (ratio / 100)}px`;
     this.editWrap.style.left = `${left + textPadding * (ratio / 100)}px`;
-    this.editWrap.style.height = NodeFontSize[getNodeLevel(checkNode)] * (ratio / 100) + 'px';
+    this.editWrap.style.height = NodeInfo[getNodeLevel(checkNode)].fontSize * (ratio / 100) + 'px';
     this.showEditWrap()
     this._editInput && (this._editInput.innerText = checkNode.text);
     this._editInput?.focus()
@@ -73,7 +73,7 @@ class EditTopic {
     // 设置选中节点的宽高
     checkNode.setAttr({
       ...checkNode.attr,
-      width: getTextWidth(checkNode, target.innerText) + NodeTextPadding[getNodeLevel(checkNode)] * (hasImg ? 3 : 2) + (hasImg ? checkNode.imageData?.width : 0)
+      width: getTextWidth(checkNode, target.innerText) + NodeInfo[getNodeLevel(checkNode)].textPadding * (hasImg ? 3 : 2) + (hasImg ? checkNode.imageData?.width : 0)
     })
     checkNode.setText(target.innerText);
     this._editStatus = false

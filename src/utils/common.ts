@@ -1,6 +1,6 @@
-import Node, { NodeOptions } from '../common/node/node'
-import { NodeType, NodeInfo, NodeTypeId } from '../common/node/helper'
-import { getNodeInfo } from './nodeUtils';
+import Node from '../common/node/node'
+import { NodeInfo, NodeTypeId } from '../common/node/helper'
+import { getNodeLevel } from './nodeUtils';
 import { operateOption, operateType } from './type'
 
 
@@ -14,7 +14,7 @@ export function getTextWidth(node: Node, str = '') {
   const dom = document.createElement('span');
   const App = document.getElementById('app')
   dom.style.display = 'inline-block';
-  dom.style.fontSize = getNodeInfo(NodeInfo.fontSize, node) + 'px'
+  dom.style.fontSize = NodeInfo[getNodeLevel(node)].fontSize + 'px'
   dom.textContent = str;
   App?.appendChild(dom);
   const width = dom.clientWidth;

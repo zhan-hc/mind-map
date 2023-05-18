@@ -1,8 +1,7 @@
 import { randomId } from '../../utils/common'
 import { operateType } from '../../utils/type'
-import { NodeWidthHeight } from '../../constant';
 import type { RaphaelElement } from 'raphael';
-import { NodeLevel, NodeTypeId } from './helper';
+import { NodeInfo, NodeLevel, NodeTypeId } from './helper';
 
 export interface shapeAttr {
   x: number;
@@ -153,8 +152,8 @@ export function getInitData () {
   const attr = {
     x: 100,
     y: 500,
-    width: NodeWidthHeight['first'].width,
-    height: NodeWidthHeight['first'].height
+    width: NodeInfo['first'].attr.width,
+    height: NodeInfo['first'].attr.height
   }
 
   const node = {
@@ -174,8 +173,8 @@ export function getChildNodeData (type: operateType, checkNode: Node) {
   const attr = {
     x: 0,
     y: 0,
-    width: NodeWidthHeight[nodeLevel].width,
-    height: NodeWidthHeight[nodeLevel].height
+    width: NodeInfo[nodeLevel].attr.width,
+    height: NodeInfo[nodeLevel].attr.height
   }
 
   const node = {
