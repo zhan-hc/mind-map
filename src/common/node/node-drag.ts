@@ -1,7 +1,5 @@
 import type { RaphaelSet } from 'raphael';
-import { NodeWidthHeight } from "../../constant";
 import { DRAG_START_CUR_RECT, NONE_BORDER } from "../../constant/attr";
-import { getNodeLevel } from "../../utils/nodeUtils";
 import Position, { insertAreaOption } from "../position";
 import { NodeTypeId } from "./helper";
 import Node from "./node";
@@ -16,7 +14,7 @@ export class NodeDrag {
     this.insertArea = null
     this.dragMove = this.dragMove.bind(this)
     this.dragEnd = this.dragEnd.bind(this)
-    this.removeDragEle = this.removeDragEle
+    this.removeDragEle = this.removeDragEle.bind(this)
   }
   public dragMove (position: {cx: number, cy: number}, rootNode: Node, node: Node, dragRect: Function) {
     const { cx, cy } = position
@@ -62,8 +60,6 @@ export class NodeDrag {
       // 拖拽的节点更改属性
       node.setAttr({
         ...node.attr,
-        width: NodeWidthHeight[getNodeLevel(node)].width,
-        height: NodeWidthHeight[getNodeLevel(node)].height,
         lineStartX: undefined,
         lineStartY: undefined
       })

@@ -1,43 +1,15 @@
 <script setup lang="ts">
-import { operateTotalType, operateType } from './utils/type';
 import { onMounted } from 'vue';
 import operate from './components/operate.vue';
 import scale from './components/scale.vue';
-import useOperate from './hooks/useOperate';
 import useDraw from './hooks/useDraw';
 import useScale from './hooks/useScale';
-import Node from './common/node/node';
 import { iconList } from './constant';
 import { Viewport } from './common/viewport'
-import EditTopic from './common/operate/editTopic';
 
-  const callbackObject: any = {}
-  let editTopic: EditTopic | null = null
-  const { handleOperate } = useOperate()
-  const { drawRender, initPaper, reDraw } = useDraw()
+  const { drawRender, initPaper, handleEditBlur, handleOperateFunc } = useDraw()
   const { ratio, changeRatio } = useScale()
 
-  // 节点操作点击事件
-  function handleOperateFunc (type: operateType) {
-    callbackObject[operateTotalType.ADD] = (id: string) => {
-      reDraw(id)
-    }
-    callbackObject[operateTotalType.EDIT] = () => {
-      editTopic?.editText(drawRender.value?.data.checkNodeList[0] as Node, ratio)
-    }
-    callbackObject[operateTotalType.IMG] = (id: string) => {
-      reDraw(id)
-    }
-    callbackObject[operateTotalType.DELETE] = () => {
-      reDraw()
-    }
-    handleOperate(drawRender, type, callbackObject)
-  }
-
-  // 节点编辑失焦事件
-  function handleEditBlur (e: Event) {
-    editTopic && (editTopic as EditTopic).addEventBlus(e, drawRender, () => reDraw())
-  }
 
   // 缩放
   function handleZoomFunc (type: 0|1) {
@@ -48,11 +20,6 @@ import EditTopic from './common/operate/editTopic';
     initPaper({
       ratio
     })
-    editTopic = new EditTopic({
-      wrapName: '.edit-wrap',
-      inputName: '.edit-text'
-    })
-    drawRender.value?.setEditTopic(editTopic)
   })
 
 

@@ -1,22 +1,12 @@
-import { Ref } from 'vue'
 import { operateTotalType, operateType } from '../utils/type'
-import { iconList, textPadding } from '../constant'
+import { textPadding } from '../constant'
 import Node, { ImageData, createNode, getChildNodeData } from '../common/node/node'
-import { DrawRender } from '../common/draw/drawRender'
 import AddImage from '../common/operate/addImage'
 import { getTextWidth } from '../utils/common'
 export default function () {
 
-  const changeDisable = (type: operateType, value: boolean) => {
-    iconList.forEach(item => {
-      if (item.type === type) {
-        item.disabled = value
-      }
-    })
-  }
 
-  function handleOperate (drawRender: Ref<DrawRender | null>, type: operateType, callbackObject?: any) {
-    const checkNodeList = drawRender.value?.data.checkNodeList as Array<Node>
+  function handleOperate (checkNodeList: Array<Node>, type: operateType, callbackObject?: any) {
     const checkNode = checkNodeList[0]
     // 增加节点
     if ([operateType.addTopic, operateType.addSubTopic].includes(type)) {
@@ -51,7 +41,6 @@ export default function () {
   }
 
   return {
-    changeDisable,
     handleOperate
   }
 }

@@ -1,19 +1,20 @@
-import type { RaphaelPaper, RaphaelElement, RaphaelReadAttributes, RaphaelSet } from 'raphael';
-import { changeIconDisabled, forTreeEvent, getCenterXY, isMobile } from '../../utils/common'
-import { getNodeCenterPosition, getNodeIconPosition,  getNodeLevel,  getNodeRectAttr, getNodeRectBorder, getNodeRectInfo, getNodeTextAttr } from '../../utils/nodeUtils'
+import type { RaphaelPaper, RaphaelElement, RaphaelReadAttributes } from 'raphael';
+import { changeIconDisabled, forTreeEvent, getCenterXY, getRectData, isMobile } from '../../utils/common'
+import { getNodeCenterPosition,  getNodeLevel,  getNodeRectAttr, getNodeRectBorder, getNodeRectInfo, getNodeTextAttr } from '../../utils/nodeUtils'
 import { dragNodeInfo, iconList, textPadding } from '../../constant'
 import Node, { shapeAttr } from '../node/node';
 import { Paper } from '../paper';
 import DrawGenerator, { rectData } from './drawGenerator';
 import { DRAW_CALLBACK_TYPE, ExtraOption, OPERATE_STATUS } from './type';
 import { Viewport } from '../viewport';
-import Position, { connectPositionOption, insertAreaOption } from '../position';
+import { connectPositionOption, insertAreaOption } from '../position';
 import { NodeLevel, NodeTypeId } from '../node/helper';
-import { CLICK_RECT_BORDER, DEFAULT_LINE_WIDTH, DRAG_PLACEHOLDER_LINE, DRAG_PLACEHOLDER_RECT, DRAG_START_CUR_RECT, HOVER_RECT_BORDER, NONE_BORDER } from '../../constant/attr';
+import { CLICK_RECT_BORDER, DEFAULT_LINE_WIDTH, DRAG_PLACEHOLDER_LINE, DRAG_PLACEHOLDER_RECT, HOVER_RECT_BORDER, NONE_BORDER } from '../../constant/attr';
 import EditTopic from '../operate/editTopic';
 import { Ref, reactive, ref } from 'vue';
 import Tree from '../tree';
 import { NodeDrag } from '../node/node-drag';
+import { NodeExpand } from '../node/node-expand';
 export interface Option extends ExtraOption {
   tree: Tree | null
 }
@@ -28,12 +29,14 @@ export class DrawRender {
   private tree: Tree | null | undefined; // 树节点
   private editTopic: EditTopic | null; // 编辑
   private operateStatus: Ref<string>; // 操作状态
+  public ratio: number | undefined;
   public constructor(paper: Paper, option: Option) {
     this.paper = paper.getPaper()
     this.drawGenerator = paper.getDrawGenertator()
     this.operateStatus = ref('')
     this.editTopic = null
     this.tree = option.tree
+    this.ratio = option.ratio && option.ratio.value
     this.data = reactive({ checkNodeList: [] })
     this.viewport = new Viewport(paper, {
       ratio: option?.ratio || ref(0), 
@@ -89,18 +92,8 @@ export class DrawRender {
 
     if (node.children && node.children.length) {
       // 绘制展开按钮
-      const data = {
-        key: 'node',
-        value: node
-      }
-      const expandIcon = this.drawGenerator.drawExpandIcon(getNodeIconPosition(node), data, !node.expand)
-      expandIcon.click(function () {
-        const node = this.data(data.key)
-        if (callback[DRAW_CALLBACK_TYPE.EXPAND]) {
-          node.setExpand(!node.expand)
-          callback[DRAW_CALLBACK_TYPE.EXPAND]()
-        }
-      })
+      const nodeExpan = new NodeExpand(this.drawGenerator, node);
+      nodeExpan.expandIconClick(callback)
       // 如果子节点展开
       if (node.expand) {
         node.children.forEach((item: Node) => this.drawTopic(item, checkNodeId, callback))
@@ -112,10 +105,7 @@ export class DrawRender {
   // 绘制最顶层的矩形节点(即悬浮可点击节点)
   public drawWrapRect (node: Node, cb?: any) {
     const that = this
-    const data = {
-      key: 'node',
-      value: node
-    }
+    const data = getRectData(node)
     const wrapRect = this.drawGenerator.drawRect(getNodeRectBorder(node, 5, 4), getNodeRectAttr(node, 1) as RaphaelReadAttributes, data)
     const mousedownName = isMobile ? 'touchstart' : 'click';
     // 鼠标点击/手指按下事件事件
@@ -236,15 +226,6 @@ export class DrawRender {
     return containerDom
   }
 
-  // 改变选中的节点
-  public changeCheckTopic(node: Node) {
-    this.data.checkNodeList.forEach(item => item.shape.attr(NONE_BORDER))
-    this.data.checkNodeList = [node]
-    // 更新操作栏的图标状态
-    changeIconDisabled(this.data.checkNodeList, iconList)
-    // 选中当前节点
-    node.shape.attr(CLICK_RECT_BORDER)
-  }
 
   public setEditTopic (edit: EditTopic) {
     this.editTopic = edit
@@ -258,6 +239,17 @@ export class DrawRender {
     this.data.checkNodeList = val
   }
 
+  // 改变选中的节点
+  public changeCheckTopic(node: Node) {
+    this.data.checkNodeList.forEach(item => item.shape.attr(NONE_BORDER))
+    this.data.checkNodeList = [node]
+    // 更新操作栏的图标状态
+    changeIconDisabled(this.data.checkNodeList, iconList)
+    // 选中当前节点
+    node.shape.attr(CLICK_RECT_BORDER)
+  }
+
+  // 节点点击事件
   private topicClickEvent (e: Event, that: any, node: Node) {
     e.stopPropagation()
     // 移动至可视区域
@@ -272,8 +264,11 @@ export class DrawRender {
   // 移动至可视区域
   public moveViewArea (node: SVGRectElement | Element) {
     this.clearClickStatus()
+    const {width, height} = this.paper
     // // 当元素被遮挡时，让其完全出现可视区域
-    const { top, left, right, bottom } = node.getBoundingClientRect()
+    let { top, left, right, bottom } = node.getBoundingClientRect()
+    right = width - right
+    bottom = height - bottom
     let moveX = this.viewport.getScaleOption().x;
     let moveY = this.viewport.getScaleOption().y;
     const event = [(val: number) => (moveY += val), (val: number) => (moveX += val), (val: number) => (moveX -= val), (val: number) => (moveY -= val)];
@@ -302,7 +297,7 @@ export class DrawRender {
   public clearClickStatus () {
     this.data.checkNodeList.forEach(item => item.shape.attr(NONE_BORDER));
     changeIconDisabled(null, iconList);
-    this.editTopic?.editInput?.blur()
+    this.editTopic?.blurInput()
   }
 
   public clear(): void {

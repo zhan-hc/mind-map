@@ -99,3 +99,10 @@ export const isMobile = mobileCheck();
 export const isWindows = (): boolean => {
   return navigator.platform.indexOf('Win') > -1
 };
+
+export const getRectData = (value: any, key = 'node') => {
+  return {
+    key,
+    value
+  }
+}

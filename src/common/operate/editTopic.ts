@@ -1,8 +1,6 @@
-import { Ref } from "vue";
 import { NodeTextPadding, textPadding } from "../../constant";
 import { getTextWidth } from "../../utils/common";
 import { getNodeLevel } from "../../utils/nodeUtils";
-import { DrawRender } from "../draw/drawRender";
 import { NodeFontSize } from "../node/helper";
 import Node from "../node/node";
 
@@ -41,12 +39,12 @@ class EditTopic {
     }
   }
 
-  public editText (checkNode: Node, ratio: Ref<number>) {
+  public editText (checkNode: Node, ratio: number) {
     if (!this.editWrap) return
     const { top, left } = checkNode.shape.node.getBoundingClientRect()
-    this.editWrap.style.top = `${top + textPadding * (ratio.value / 100)}px`;
-    this.editWrap.style.left = `${left + textPadding * (ratio.value / 100)}px`;
-    this.editWrap.style.height = NodeFontSize[getNodeLevel(checkNode)] * (ratio.value / 100) + 'px';
+    this.editWrap.style.top = `${top + textPadding * (ratio / 100)}px`;
+    this.editWrap.style.left = `${left + textPadding * (ratio / 100)}px`;
+    this.editWrap.style.height = NodeFontSize[getNodeLevel(checkNode)] * (ratio / 100) + 'px';
     this.showEditWrap()
     this._editInput && (this._editInput.innerText = checkNode.text);
     this._editInput?.focus()
@@ -68,8 +66,7 @@ class EditTopic {
   }
 
   // 失焦事件
-  public addEventBlus (e: Event, drawRender: Ref<DrawRender | null>, callback?: Function) {
-    const checkNode = drawRender.value?.data.checkNodeList[0] as Node
+  public addEventBlur (e: Event, checkNode: Node, callback?: Function) {
     const target = e.target as HTMLElement;
     const hasImg = checkNode?.imageData && checkNode.imageData.url
     this.hideEditWrap()

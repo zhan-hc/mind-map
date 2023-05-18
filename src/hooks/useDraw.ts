@@ -5,29 +5,52 @@ import { Paper } from "../common/paper"
 import Position from "../common/position"
 import Tree from "../common/tree"
 import { DRAW_CALLBACK_TYPE, ExtraOption } from '../common/draw/type'
-import { getInitData } from '../common/node/node'
+import Node, { getInitData } from '../common/node/node'
+import { operateTotalType, operateType } from '../utils/type'
+import EditTopic from '../common/operate/editTopic'
+import useOperate from './useOperate'
 
 interface dataOption {
-  tree:  Tree | null,
-  paper: Paper | null,
-  drawGenerator: DrawGenerator | null,
-  drawRender: DrawRender | null
+  tree:  Tree | null;
+  paper: Paper | null;
+  drawGenerator: DrawGenerator | null;
+  drawRender: DrawRender | null;
+  callbacks: any;
 }
+
 export default function () {
+  const { handleOperate } = useOperate()
+  let editTopic: EditTopic | null = null 
   const data: dataOption = reactive({
     tree:  null,
     paper:  null,
     drawGenerator: null,
-    drawRender: null
+    drawRender: null,
+    callbacks: {}
   })
+
+  /**
+   * 初始化画布
+   * @param options 
+   */
   function initPaper (options: ExtraOption) {
     data.tree = new Tree({data: getInitData()});
     data.paper = new Paper('#paper');
     data.drawGenerator = new DrawGenerator(data.paper.getPaper());
     data.drawRender = new DrawRender(data.paper, {...options, tree: data.tree});
     reDraw();
+    editTopic = new EditTopic({
+      wrapName: '.edit-wrap',
+      inputName: '.edit-text'
+    })
+    data.drawRender?.setEditTopic(editTopic)
   }
 
+  /**
+   * 重绘
+   * @param newNodeId 
+   * @param cb 
+   */
   function reDraw (newNodeId = '', cb?: any) {
     const position = new Position()
     const rootTree = (data.tree as Tree).getRoot()
@@ -48,9 +71,32 @@ export default function () {
   }
 
 
+  /**
+   * 节点操作事件
+   * @param type 
+   */
+  function handleOperateFunc (type: operateType) {
+    data.callbacks = {
+      [operateTotalType.ADD]: (id: string) => reDraw(id),
+      [operateTotalType.EDIT]: () => editTopic?.editText(data.drawRender?.data.checkNodeList[0] as Node, data.drawRender?.ratio as number),
+      [operateTotalType.IMG]: (id: string) => reDraw(id),
+      [operateTotalType.DELETE]: () => reDraw()
+    }
+    handleOperate(data.drawRender?.data.checkNodeList as Array<Node>, type, data.callbacks)
+  }
+  /**
+   * 编辑框失焦事件
+   * @param e 
+   */
+  function handleEditBlur (e: Event) {
+    editTopic && (editTopic as EditTopic).addEventBlur(e, data.drawRender?.data.checkNodeList[0] as Node, () => reDraw())
+  }
+
   return {
     ...toRefs(data),
     initPaper,
-    reDraw
+    reDraw,
+    handleEditBlur,
+    handleOperateFunc
   }
 }
