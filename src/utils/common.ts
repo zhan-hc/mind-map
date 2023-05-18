@@ -49,7 +49,11 @@ export function changeIconDisabled (checkNodes: Array<Node> | null, iconList: op
     })
   } else if (checkNodes === null) {
     iconList.forEach(item => {
-      item.disabled = true
+      if (item.type === operateType.saveData) {
+        item.disabled = false
+      } else {
+        item.disabled = true
+      }
     })
   } else {
     iconList.forEach(item => {
@@ -77,12 +81,12 @@ export function getCenterXY (x:number, y:number, x2:number, y2:number) {
 }
 
 // 树节点遍历事件
-export function forTreeEvent (root: Node, cb: Function) {
+export function forTreeEvent (root: Node, cb: Function, pid?: string) {
   const len = root.children.length
-  cb(root)
+  cb(root, pid)
   if (len) {
     root.children.forEach(item => {
-      forTreeEvent(item, cb)
+      forTreeEvent(item, cb, root.id)
     })
   }
 }
@@ -106,3 +110,9 @@ export const getRectData = (value: any, key = 'node') => {
     value
   }
 }
+
+export const getLocalStorage = (key: string) => {
+  return localStorage.getItem(key)
+}
+
+

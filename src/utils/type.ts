@@ -3,14 +3,16 @@ export enum operateType {
   addSubTopic,
   editTopic,
   addImage,
-  delTopic
+  delTopic,
+  saveData
 }
 
 export enum operateTotalType {
   ADD = 'add',
   EDIT = 'edit',
   DELETE = 'delete',
-  IMG = 'img'
+  IMG = 'img',
+  SAVE = 'save'
 }
 
 export interface operateOption {

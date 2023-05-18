@@ -20,3 +20,5 @@ If the standalone TypeScript plugin doesn't feel fast enough to you, Volar has a
 
 // 已存在bug
 1. 缩放之后单击选择框获取的鼠标位置不对
+2. 可对图片进行优化删除等功能
+3. 实现保存数据的话，因目前图片是临时链接可能保存的imgurl是临时的

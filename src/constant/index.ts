@@ -1,10 +1,11 @@
 import { operateType, operateOption } from '../utils/type'
 import { operateIcons } from '../utils/unocss-icon'
 import { reactive } from 'vue'
+export const dataKey = 'mind-map_node-data'
+
 export const moduleInterval = 50 // 模块左右间隔
 export const modulePadding = 25 // 模块上下间隔
 export const textPadding = 10 // 文本左右边距
-
 
 export const iconList: operateOption[] = reactive([
   {
@@ -31,6 +32,11 @@ export const iconList: operateOption[] = reactive([
     icon: operateIcons[operateType.delTopic],
     disabled: true,
     type: operateType.delTopic
+  },
+  {
+    icon: operateIcons[operateType.saveData],
+    disabled: false,
+    type: operateType.saveData
   }
 ])
 

@@ -26,7 +26,7 @@ export class DrawRender {
   private readonly drawGenerator: DrawGenerator;
   public viewport: Viewport;
   public data: renderData;
-  private tree: Tree | null | undefined; // 树节点
+  public tree: Tree | null | undefined; // 树节点
   private editTopic: EditTopic | null; // 编辑
   private operateStatus: Ref<string>; // 操作状态
   public ratio: number | undefined;

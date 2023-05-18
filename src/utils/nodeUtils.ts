@@ -4,6 +4,7 @@
 import Node, { dragAreaOption } from '../common/node/node'
 import { NodeInfo, NodeTypeId, NodeLevel } from '../common/node/helper'
 import { positionOption } from '../common/position'
+import { forTreeEvent } from './common'
 
 /**
  * 获取节点绘制元素相关方法
@@ -86,5 +87,55 @@ export function getNodeIconPosition (node: Node, radius: number = 10) {
     radius
   }
   return position
+}
+
+export function treeToFlat (node: Node | undefined) {
+  if (!node) return
+  const list:any = []
+  forTreeEvent(node, (item: Node, pid: any) => {
+    list.push({
+      id: item.id,
+      attr:item.attr,
+      sort:item.sort,
+      text:item.text,
+      pid: pid || 0,
+      expand: true
+    })
+  })
+  return list
+}
+
+// 扁平化数据转tree
+export function arrayToTree(items: any) {
+  const result = [];   // 存放结果集
+  const itemMap:any = {};  // 
+  for (const item of items) {
+    const id = item.id;
+    const pid = item.pid;
+
+    if (!itemMap[id]) {
+      itemMap[id] = {
+        children: [],
+      }
+    }
+
+    itemMap[id] = new Node(item)
+
+    const treeItem =  itemMap[id];
+
+    if (pid === 0) {
+      result.push(treeItem);
+    } else {
+      if (!itemMap[pid]) {
+        itemMap[pid] = {
+          children: [],
+        }
+      }
+      treeItem.setFather(itemMap[pid])
+      itemMap[pid].children.push(treeItem)
+    }
+
+  }
+  return result;
 }
 

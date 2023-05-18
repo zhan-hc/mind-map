@@ -36,7 +36,11 @@ export default function () {
     // 删除节点
     else if (type === operateType.delTopic) {
       checkNodeList.forEach(item => item.father?.removeChild(item))
-      callbackObject[operateTotalType.DELETE]() && callbackObject[operateTotalType.DELETE]()
+      callbackObject[operateTotalType.DELETE] && callbackObject[operateTotalType.DELETE]()
+    }
+    // 保存数据
+    else if (type === operateType.saveData) {
+      callbackObject[operateTotalType.SAVE] && callbackObject[operateTotalType.SAVE]()
     }
   }
 

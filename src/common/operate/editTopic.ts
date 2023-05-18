@@ -47,6 +47,7 @@ class EditTopic {
     this.editWrap.style.height = NodeInfo[getNodeLevel(checkNode)].fontSize * (ratio / 100) + 'px';
     this.showEditWrap()
     this._editInput && (this._editInput.innerText = checkNode.text);
+    this.moveCursorEnd()
     this._editInput?.focus()
     this._editStatus = true
   }
@@ -84,6 +85,14 @@ class EditTopic {
   public EventKeydown (e: KeyboardEvent) {
     if (e.code === 'Enter') {
       this._editInput?.blur()
+    }
+  }
+
+  public moveCursorEnd () {
+    const range = window.getSelection()
+    if (range) {
+      range.selectAllChildren(this._editInput as HTMLElement)
+      range.collapseToEnd()
     }
   }
 }

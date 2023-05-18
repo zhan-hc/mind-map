@@ -9,6 +9,9 @@ import Node, { getInitData } from '../common/node/node'
 import { operateTotalType, operateType } from '../utils/type'
 import EditTopic from '../common/operate/editTopic'
 import useOperate from './useOperate'
+import { getLocalStorage } from '../utils/common'
+import { dataKey } from '../constant'
+import { arrayToTree, treeToFlat } from '../utils/nodeUtils'
 
 interface dataOption {
   tree:  Tree | null;
@@ -34,7 +37,12 @@ export default function () {
    * @param options 
    */
   function initPaper (options: ExtraOption) {
+    const nodeData = getLocalStorage(dataKey)
     data.tree = new Tree({data: getInitData()});
+    // 如果缓存中有数据
+    if (nodeData) {
+      data.tree.setRoot(arrayToTree(JSON.parse(nodeData))[0])
+    }
     data.paper = new Paper('#paper');
     data.drawGenerator = new DrawGenerator(data.paper.getPaper());
     data.drawRender = new DrawRender(data.paper, {...options, tree: data.tree});
@@ -54,6 +62,7 @@ export default function () {
   function reDraw (newNodeId = '', cb?: any) {
     const position = new Position()
     const rootTree = (data.tree as Tree).getRoot()
+    console.log(rootTree, 'roottree')
     // 对节点重新计算位置
     position.getNodePosition(rootTree)
     data.paper?.clear()
@@ -80,7 +89,8 @@ export default function () {
       [operateTotalType.ADD]: (id: string) => reDraw(id),
       [operateTotalType.EDIT]: () => editTopic?.editText(data.drawRender?.data.checkNodeList[0] as Node, data.drawRender?.ratio as number),
       [operateTotalType.IMG]: (id: string) => reDraw(id),
-      [operateTotalType.DELETE]: () => reDraw()
+      [operateTotalType.DELETE]: () => reDraw(),
+      [operateTotalType.SAVE]: () => localStorage.setItem(dataKey, JSON.stringify(treeToFlat(data.tree?.getRoot())))
     }
     handleOperate(data.drawRender?.data.checkNodeList as Array<Node>, type, data.callbacks)
   }

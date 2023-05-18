@@ -135,7 +135,7 @@ class Node {
   public setAttr (attr: shapeAttr) {
     this._attr = attr
   }
-  public setFather (node: Node) {
+  public setFather (node: Node | null) {
     this._father = node
   }
   public setImageData (imageData: ImageData) {

@@ -1,7 +1,7 @@
 import Node, { NodeOptions, createNode } from './node/node'
 import Position from './position';
 export class Tree {
-  private readonly root: Node;
+  private root: Node;
   private readonly position: Position;
   constructor({
     data
@@ -14,6 +14,10 @@ export class Tree {
   }
   public getRoot(): Node {
     return this.root;
+  }
+
+  public setRoot (val: Node) {
+    this.root = val
   }
 }
 
