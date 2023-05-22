@@ -1,16 +1,15 @@
 <script setup lang="ts">
 import { toRefs } from 'vue'
-import { operateOption } from '../utils/type'
-
+import { operateOption } from '../constant/operate'
+import { ElTooltip } from 'element-plus'
 const props = defineProps({
-  iconList: {
+  operateList: {
     type: Array<operateOption>,
     default: () => []
   }
 })
 
-const split = [1, 4]
-const { iconList }  = toRefs(props)
+const { operateList }  = toRefs(props)
 const emit  = defineEmits(['handleOperate'])
 
 function handleOperate (item: operateOption): void {
@@ -22,9 +21,40 @@ function handleOperate (item: operateOption): void {
 
 <template>
   <div class="wrap">
-    <div class="operate-main" v-for="(item, i) in iconList" :key="i" >
-      <div class="operate-item" :class="[item.icon, item.disabled ? 'disabled' : '']" @click="handleOperate(item)"></div>
-      <div v-if="split.includes(i)" class="split-line"></div>
+    <div class="operate-main" v-for="(item, i) in operateList.slice(0, 2)" :key="i" >
+      <el-tooltip
+        class="box-item"
+        effect="dark"
+        :content="item.desc"
+        :disabled="item.disabled"
+        placement="bottom"
+      >
+        <div class="operate-item" :class="[item.icon, item.disabled ? 'disabled' : '']" @click="handleOperate(item)"></div>
+      </el-tooltip>
+    </div>
+    <div class="split-line"></div>
+    <div class="operate-main" v-for="(item, i) in operateList.slice(2, 5)" :key="i" >
+      <el-tooltip
+        class="box-item"
+        effect="dark"
+        :content="item.desc"
+        :disabled="item.disabled"
+        placement="bottom"
+      >
+        <div class="operate-item" :class="[item.icon, item.disabled ? 'disabled' : '']" @click="handleOperate(item)"></div>
+      </el-tooltip>
+    </div>
+    <div class="split-line"></div>
+    <div class="operate-main" v-for="(item, i) in operateList.slice(5)" :key="i" >
+      <el-tooltip
+        class="box-item"
+        effect="dark"
+        :content="item.desc"
+        :disabled="item.disabled"
+        placement="bottom"
+      >
+        <div class="operate-item" :class="[item.icon, item.disabled ? 'disabled' : '']" @click="handleOperate(item)"></div>
+      </el-tooltip>
     </div>
   </div>
   
@@ -41,7 +71,7 @@ function handleOperate (item: operateOption): void {
   align-items: center;
   height: 50px;
   width: 300px;
-  padding: 0 20px;
+  padding: 0 10px;
   background: #fff;
   transform: translateX(-50%);
   border-radius: 5px;
@@ -54,10 +84,10 @@ function handleOperate (item: operateOption): void {
   align-items: center;
 }
 .split-line {
-  position: absolute;
+  /* position: absolute;
   right: -10px;
   top: 50%;
-  transform: translateY(-50%);
+  transform: translateY(-50%); */
   width: 2px;
   height: 20px;
   background-color: #ccc;

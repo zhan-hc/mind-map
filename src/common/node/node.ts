@@ -1,5 +1,5 @@
 import { randomId } from '../../utils/common'
-import { operateType } from '../../utils/type'
+import { operateType } from '../../constant/operate'
 import type { RaphaelElement } from 'raphael';
 import { NodeInfo, NodeLevel, NodeTypeId } from './helper';
 
@@ -32,6 +32,7 @@ export interface ImageData {
   url: string;
   width: number;
   height: number;
+  file: File
 }
 
 class Node {

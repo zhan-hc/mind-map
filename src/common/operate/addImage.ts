@@ -1,3 +1,7 @@
+import { IMG_SIZE } from "../../constant";
+import { uploadImage } from "../../services/upload";
+import Node, { ImageData } from "../node/node";
+
 class AddImage {
   private _filePath: string;
   public constructor () {
@@ -20,14 +24,45 @@ class AddImage {
           const img = new Image();
           img.src = that._filePath
           img.onload = function () {
+            console.log(that.scaleImage(img), 'that.scaleImage(img)')
             cb({
               url: that._filePath,
-              width: img.width,
-              height: img.height
+              ...that.scaleImage(img),
+              file
             })
           }
       });
       input.click();
+  }
+  // 等比例缩放图片
+  public scaleImage (image: HTMLImageElement) {
+    const fitWidth = IMG_SIZE.width
+    const fitHeight = IMG_SIZE.height
+    let newWidth = image.width
+    let newHeight = image.height
+    if (image.width > 0 && image.height > 0){
+      if(image.width / image.height >=  fitWidth / fitHeight) {
+        if (image.width > fitWidth) {
+          newWidth = fitWidth;
+          newHeight = (image.height * fitWidth) / image.width;
+        } else {
+          newWidth= image.width; 
+          newHeight = image.height;
+        }
+      } else {
+        if (image.height > fitHeight) {
+          newHeight = fitHeight;
+          newWidth = (image.width * fitHeight) / image.height;
+        } else {
+          newWidth = image.width; 
+          newHeight = image.height;
+        } 
+     }
+     return {
+      width: newWidth,
+      height: newHeight
+     }
+  }
   }
 }
 

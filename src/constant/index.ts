@@ -1,44 +1,8 @@
-import { operateType, operateOption } from '../utils/type'
-import { operateIcons } from '../utils/unocss-icon'
-import { reactive } from 'vue'
 export const dataKey = 'mind-map_node-data'
 
 export const moduleInterval = 50 // 模块左右间隔
 export const modulePadding = 25 // 模块上下间隔
 export const textPadding = 10 // 文本左右边距
-
-export const iconList: operateOption[] = reactive([
-  {
-    icon: operateIcons[operateType.addTopic],
-    disabled: true,
-    type: operateType.addTopic
-  },
-  {
-    icon: operateIcons[operateType.addSubTopic],
-    disabled: true,
-    type: operateType.addSubTopic
-  },
-  {
-    icon: operateIcons[operateType.editTopic],
-    disabled: true,
-    type: operateType.editTopic
-  },
-  {
-    icon: operateIcons[operateType.addImage],
-    disabled: true,
-    type: operateType.addImage
-  },
-  {
-    icon: operateIcons[operateType.delTopic],
-    disabled: true,
-    type: operateType.delTopic
-  },
-  {
-    icon: operateIcons[operateType.saveData],
-    disabled: false,
-    type: operateType.saveData
-  }
-])
 
 
 export const dragNodeInfo = {
@@ -51,4 +15,9 @@ export const dragNodeInfo = {
 export const VIEWPORT_SIZE = {
   MIN: 0.5,
   MAX: 3
+}
+
+export const IMG_SIZE = {
+  width: 300,
+  height: 300
 }

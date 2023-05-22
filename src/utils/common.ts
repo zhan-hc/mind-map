@@ -1,7 +1,7 @@
 import Node from '../common/node/node'
 import { NodeInfo, NodeTypeId } from '../common/node/helper'
 import { getNodeLevel } from './nodeUtils';
-import { operateOption, operateType } from './type'
+import { operateOption, operateType } from '../constant/operate'
 
 
 // 生成随机id
@@ -23,13 +23,13 @@ export function getTextWidth(node: Node, str = '') {
 }
 
 // 改变操作icon的disabled属性
-export function changeIconDisabled (checkNodes: Array<Node> | null, iconList: operateOption[]) {
+export function changeIconDisabled (checkNodes: Array<Node> | null, operateList: operateOption[]) {
   if (checkNodes && !checkNodes.length) return
   // 当选中多个节点时
   if (checkNodes && checkNodes?.length > 1) {
     // 如果多选里面包含根阶段
     const haveRoot = checkNodes.some(item => item.id === NodeTypeId.root)
-    iconList.forEach(item => {
+    operateList.forEach(item => {
       if (haveRoot) {
         item.disabled = true
       } else {
@@ -40,7 +40,7 @@ export function changeIconDisabled (checkNodes: Array<Node> | null, iconList: op
   }
   // 如果是根节点不能添加兄弟节点和删除节点
   if (checkNodes !== null && checkNodes[0].id === NodeTypeId.root) {
-    iconList.forEach(item => {
+    operateList.forEach(item => {
       if (![operateType.addTopic, operateType.delTopic].includes(item.type)) {
         item.disabled = false
       } else {
@@ -48,7 +48,7 @@ export function changeIconDisabled (checkNodes: Array<Node> | null, iconList: op
       }
     })
   } else if (checkNodes === null) {
-    iconList.forEach(item => {
+    operateList.forEach(item => {
       if (item.type === operateType.saveData) {
         item.disabled = false
       } else {
@@ -56,7 +56,7 @@ export function changeIconDisabled (checkNodes: Array<Node> | null, iconList: op
       }
     })
   } else {
-    iconList.forEach(item => {
+    operateList.forEach(item => {
       item.disabled = false
     })
   }

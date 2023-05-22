@@ -1,8 +1,8 @@
-import { operateTotalType, operateType } from '../utils/type'
+import { operateTotalType, operateType } from '../constant/operate'
 import { textPadding } from '../constant'
 import Node, { ImageData, createNode, getChildNodeData } from '../common/node/node'
 import AddImage from '../common/operate/addImage'
-import { getTextWidth } from '../utils/common'
+import { forTreeEvent, getTextWidth } from '../utils/common'
 export default function () {
 
 
@@ -24,10 +24,9 @@ export default function () {
       const img = new AddImage()
       img.chooseImage((img: ImageData) => {
         checkNode.setImageData(img)
-        const { height } = checkNode.attr
         checkNode.setAttr({
           ...checkNode.attr,
-          height: img.height > height ? (img.height + textPadding * 2) : height,
+          height: img.height + textPadding * 2,
           width: img.width + getTextWidth(checkNode, checkNode.text) + textPadding * 3
         })
         callbackObject[operateTotalType.IMG] && callbackObject[operateTotalType.IMG]()

@@ -98,6 +98,7 @@ export function treeToFlat (node: Node | undefined) {
       attr:item.attr,
       sort:item.sort,
       text:item.text,
+      imageData: item.imageData,
       pid: pid || 0,
       expand: true
     })

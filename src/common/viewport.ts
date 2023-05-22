@@ -1,6 +1,7 @@
 import { Ref } from 'vue';
 import { Paper } from './paper';
-import { VIEWPORT_SIZE, iconList } from '../constant';
+import { VIEWPORT_SIZE } from '../constant';
+import { operateList } from '../constant//operate';
 import { changeIconDisabled, getAssetsFile, isMobile } from '../utils/common';
 import type { RaphaelElement } from 'raphael';
 import { setNodeRectAttr } from '../utils/nodeUtils';
@@ -160,7 +161,7 @@ export class Viewport {
       this._checkNodeList = this.callBacks['checkBoxEvent'](boxAttr)
       this.callBacks['setCheckNodeList'](this._checkNodeList)
       this._checkNodeList.forEach(item => item.shape.attr(setNodeRectAttr( 2, '#3498db')))
-      changeIconDisabled(this._checkNodeList, iconList)
+      changeIconDisabled(this._checkNodeList, operateList)
     }
 
     // 如果空格 + 鼠标按下（拖拽移动）

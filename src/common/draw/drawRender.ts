@@ -1,7 +1,8 @@
 import type { RaphaelPaper, RaphaelElement, RaphaelReadAttributes } from 'raphael';
 import { changeIconDisabled, forTreeEvent, getCenterXY, getRectData, isMobile } from '../../utils/common'
 import { getNodeCenterPosition,  getNodeLevel,  getNodeRectAttr, getNodeRectBorder, getNodeRectInfo, getNodeTextAttr } from '../../utils/nodeUtils'
-import { dragNodeInfo, iconList, textPadding } from '../../constant'
+import { dragNodeInfo, textPadding } from '../../constant'
+import { operateList } from '../../constant/operate'
 import Node, { shapeAttr } from '../node/node';
 import { Paper } from '../paper';
 import DrawGenerator, { rectData } from './drawGenerator';
@@ -87,7 +88,7 @@ export class DrawRender {
     if (node.id === checkNodeId) {
       node.shape.attr(CLICK_RECT_BORDER)
       this.data.checkNodeList = [node]
-      changeIconDisabled(this.data.checkNodeList, iconList)
+      changeIconDisabled(this.data.checkNodeList, operateList)
     }
 
     if (node.children && node.children.length) {
@@ -244,7 +245,7 @@ export class DrawRender {
     this.data.checkNodeList.forEach(item => item.shape.attr(NONE_BORDER))
     this.data.checkNodeList = [node]
     // 更新操作栏的图标状态
-    changeIconDisabled(this.data.checkNodeList, iconList)
+    changeIconDisabled(this.data.checkNodeList, operateList)
     // 选中当前节点
     node.shape.attr(CLICK_RECT_BORDER)
   }
@@ -296,7 +297,7 @@ export class DrawRender {
   // 清空点击状态
   public clearClickStatus () {
     this.data.checkNodeList.forEach(item => item.shape.attr(NONE_BORDER));
-    changeIconDisabled(null, iconList);
+    changeIconDisabled(null, operateList);
     this.editTopic?.blurInput()
   }
 
