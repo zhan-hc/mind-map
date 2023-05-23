@@ -9,7 +9,6 @@ let defaultOption =  {
 
 
 const showLoading = (option?: LoadingOptions) => {
-  console.log(option || defaultOption)
   loadingInstance = ElLoading.service({ ...defaultOption, ...option });
 };
 

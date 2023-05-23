@@ -24,7 +24,6 @@ class AddImage {
           const img = new Image();
           img.src = that._filePath
           img.onload = function () {
-            console.log(that.scaleImage(img), 'that.scaleImage(img)')
             cb({
               url: that._filePath,
               ...that.scaleImage(img),

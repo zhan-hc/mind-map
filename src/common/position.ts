@@ -53,7 +53,7 @@ class AreaHeight {
     if (this.areaHeightMap.has(node.id)) {
       return this.areaHeightMap.get(node.id) as number
     }
-    if (node.children.length) {
+    if (node.children.length && node.expand) {
       const childrenAreaHeight = node.children.reduce((total, child) => {
         const childAreaHeight = this.getAreaHeight(child);
         return total + childAreaHeight;
