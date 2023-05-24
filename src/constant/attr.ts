@@ -3,7 +3,7 @@
  * 公共
  */
 
-import { RaphaelReadAttributes } from "raphael"
+import { RaphaelAttributes } from "raphael"
 
 // 边框为0
 export const NONE_BORDER = {
@@ -28,19 +28,19 @@ export const HOVER_RECT_BORDER = {
   'stroke-width': 2,
   'stroke': HOVER_COLOR,
   'stroke-dasharray': ''
-} as RaphaelReadAttributes
+} as RaphaelAttributes
 
 export const CLICK_RECT_BORDER = {
   'stroke-width': 2,
   'stroke': CLICK_COLOR,
   'stroke-dasharray': ''
-} as RaphaelReadAttributes
+} as RaphaelAttributes
 
 export const SELECT_RECT = {
   ...HOVER_RECT_BORDER,
   fill: '#997cff',
   'fill-opacity': 0.1
-} as RaphaelReadAttributes
+} as RaphaelAttributes
 /**
  * 拖拽相关
  */
@@ -53,18 +53,18 @@ export const DRAG_START_CUR_RECT = {
   'stroke': DRAG_COLOR,
   ...DEFAULT_LINE_WIDTH,
   'stroke-dasharray': '-'
-} as RaphaelReadAttributes
+} as RaphaelAttributes
 
 // 拖拽时的占位矩形
 export const DRAG_PLACEHOLDER_RECT = {
   'fill': DRAG_COLOR,
   'stroke-width': 0
-} as RaphaelReadAttributes
+} as RaphaelAttributes
 // 拖拽时的占位链接线
 export const DRAG_PLACEHOLDER_LINE = {
   stroke: DRAG_COLOR,
   ...DEFAULT_LINE_WIDTH
-} as RaphaelReadAttributes
+} as RaphaelAttributes
 
 
 /**
@@ -75,4 +75,4 @@ export const EXPAND_CIRCLE = {
   'stroke': '#262626',
   ...DEFAULT_LINE_WIDTH,
   'fill': '#ccc'
-} as RaphaelReadAttributes
+} as RaphaelAttributes

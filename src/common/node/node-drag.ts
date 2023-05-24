@@ -8,10 +8,12 @@ export class NodeDrag {
   private position: Position;
   private dragInsertEle: RaphaelSet | null; // 拖拽可插入的区域显示
   private insertArea: insertAreaOption | null; // 拖拽可插入的区域显示
+  private insertAreaList: insertAreaOption[] | null; // 拖拽可插入的区域显示
   public constructor() {
     this.position = new Position()
     this.dragInsertEle = null
     this.insertArea = null
+    this.insertAreaList = null
     this.dragMove = this.dragMove.bind(this)
     this.dragEnd = this.dragEnd.bind(this)
     this.removeDragEle = this.removeDragEle.bind(this)
@@ -24,11 +26,11 @@ export class NodeDrag {
     // 拖拽的节点设置红色虚线框
     node.shape.attr(DRAG_START_CUR_RECT);
     // 获取可插入区域的集合
-    const list = this.position.getNodeInsertArea(rootNode, [], node)
+    this.insertAreaList = this.insertAreaList || this.position.getNodeInsertArea(rootNode, [], node)
     // 获取拖拽鼠标坐标所在的插入区域
-    for (let i = 0;i<list.length;i++) {
-      if (cx > list[i].area.x && cy > list[i].area.y && cx <= list[i].area.x2 && cy <= list[i].area.y2) {
-        this.insertArea = list[i]
+    for (let i = 0;i<this.insertAreaList.length;i++) {
+      if (cx > this.insertAreaList[i].area.x && cy > this.insertAreaList[i].area.y && cx <= this.insertAreaList[i].area.x2 && cy <= this.insertAreaList[i].area.y2) {
+        this.insertArea = this.insertAreaList[i]
         break;
       }
     }
@@ -44,6 +46,7 @@ export class NodeDrag {
   }
 
   public dragEnd ( node: Node, cb: Function) {
+    this.insertAreaList = null
     // 如果拖拽的区域未变
     if (this.dragInsertEle && this.dragId === this.insertArea?.id) {
       return

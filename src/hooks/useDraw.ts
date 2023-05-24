@@ -70,6 +70,8 @@ export default function () {
     // 对节点重新计算位置
     position.getNodePosition(rootTree)
     data.paper?.clear()
+    // const { width, height } = data.paper?.getPaperAttr()
+    // data.drawRender?.drawParentRect(width, height)
     // 展开按钮的回调
     const callbackObj = {
       [DRAW_CALLBACK_TYPE.EXPAND]: function () {
@@ -80,6 +82,7 @@ export default function () {
       },
       ...cb
     }
+    data.drawRender?.setRapSetList([])
     data.tree && data.drawRender?.drawTopic(rootTree, newNodeId, callbackObj)
   }
 

@@ -1,4 +1,4 @@
-import type { RaphaelPaper, RaphaelElement, RaphaelReadAttributes } from 'raphael';
+import type { RaphaelElement, RaphaelAttributes, RaphaelSet } from 'raphael';
 import { changeIconDisabled, forTreeEvent, getCenterXY, getRectData, isMobile } from '../../utils/common'
 import { getNodeCenterPosition,  getNodeLevel,  getNodeRectAttr, getNodeRectBorder, getNodeRectInfo, getNodeTextAttr } from '../../utils/nodeUtils'
 import { dragNodeInfo, textPadding } from '../../constant'
@@ -23,22 +23,24 @@ interface renderData {
   checkNodeList: Array<Node> // 选中的边框
 }
 export class DrawRender {
-  private readonly paper: RaphaelPaper;
+  private readonly paper: Paper;
   private readonly drawGenerator: DrawGenerator;
   public viewport: Viewport;
   public data: renderData;
   public tree: Tree | null | undefined; // 树节点
   private editTopic: EditTopic | null; // 编辑
   private operateStatus: Ref<string>; // 操作状态
+  private rapSetList: Array<RaphaelSet<"SVG" | "VML">>; // 每个节点的集合
   public ratio: number | undefined;
   public constructor(paper: Paper, option: Option) {
-    this.paper = paper.getPaper()
+    this.paper = paper
     this.drawGenerator = paper.getDrawGenertator()
     this.operateStatus = ref('')
     this.editTopic = null
     this.tree = option.tree
     this.ratio = option.ratio && option.ratio.value
     this.data = reactive({ checkNodeList: [] })
+    this.rapSetList = []
     this.viewport = new Viewport(paper, {
       ratio: option?.ratio || ref(0), 
       operateStatus: this.operateStatus, 
@@ -49,13 +51,15 @@ export class DrawRender {
       }
     })
     this.drawTopic = this.drawTopic.bind(this)
+    this.paperClick()
+    
   }
 
   // 绘制节点
   public drawTopic (node:Node, checkNodeId: string, callback?: any) {
-    const st = this.paper.set()
+    const st = this.paper.getPaper().set()
     // 矩形节点
-    const rect = this.drawGenerator.drawRect(getNodeRectInfo(node, 5), getNodeRectAttr(node, 0) as RaphaelReadAttributes) // 底层节点
+    const rect = this.drawGenerator.drawRect(getNodeRectInfo(node, 5), getNodeRectAttr(node, 0) as RaphaelAttributes) // 底层节点
     st.push(rect)
     // 图片
     const hasImg = node.imageData && node.imageData.url
@@ -66,7 +70,7 @@ export class DrawRender {
 
     // 文本
     const {x, y} = getNodeCenterPosition(node)
-    const text = this.drawGenerator.drawText({ x: x + (hasImg ? (node.imageData.width * 0.5) : 0), y }, node.text, getNodeTextAttr(node) as RaphaelReadAttributes)
+    const text = this.drawGenerator.drawText({ x: x + (hasImg ? (node.imageData.width * 0.5) : 0), y }, node.text, getNodeTextAttr(node) as RaphaelAttributes)
     st.push(text)
 
     // 节点连接线
@@ -78,7 +82,7 @@ export class DrawRender {
     // 最顶层矩形主要用于hover和click
     const wrapRect = this.drawWrapRect(node, callback || null)
     st.push(wrapRect)
-
+    this.rapSetList.push(st)
     if (node.id === NodeTypeId.root) {
       callback[node.id] = node
     }
@@ -107,12 +111,9 @@ export class DrawRender {
   public drawWrapRect (node: Node, cb?: any) {
     const that = this
     const data = getRectData(node)
-    const wrapRect = this.drawGenerator.drawRect(getNodeRectBorder(node, 5, 4), getNodeRectAttr(node, 1) as RaphaelReadAttributes, data)
-    const mousedownName = isMobile ? 'touchstart' : 'click';
-    // 鼠标点击/手指按下事件事件
-    wrapRect[mousedownName](function (e) {
-      that.topicClickEvent(e, that, node)}
-    )
+    const wrapRect = this.drawGenerator.drawRect(getNodeRectBorder(node, 5, 4), getNodeRectAttr(node, 1) as RaphaelAttributes, data)
+    // 为了事件委托中判断元素
+    wrapRect.node.setAttribute('class', 'topic');
     // 拖拽事件
     if (cb && cb[DRAW_CALLBACK_TYPE.DRAG] && !isMobile) {
       const nodeDrag = new NodeDrag()
@@ -146,7 +147,7 @@ export class DrawRender {
 
   // 绘制拖拽占位矩形
   public drawDragRect (insertArea: insertAreaOption, data?: rectData) {
-    const st = this.paper.set()
+    const st = this.paper.getPaper().set()
     const {x, y, x2, y2} = insertArea.area
     const { cx, cy } = getCenterXY(x, y, x2, y2)
     // 拖拽占位矩形
@@ -174,7 +175,7 @@ export class DrawRender {
   }
 
   // 绘制节点链接线
-  public drawLine (node: any, attr?: RaphaelReadAttributes) {
+  public drawLine (node: any, attr?: RaphaelAttributes) {
     const pNode = node.father
     if (!pNode) return
     // 节点的中心坐标
@@ -210,7 +211,7 @@ export class DrawRender {
       } as connectPositionOption
       linePath = this.drawGenerator.drawChildLine(startPosition, endPosition)
     }
-    const drawAttr = attr ?? DEFAULT_LINE_WIDTH as RaphaelReadAttributes
+    const drawAttr = attr ?? DEFAULT_LINE_WIDTH as RaphaelAttributes
     const line = this.drawGenerator.drawLine(linePath, drawAttr)
     line.toBack()
     return line
@@ -240,6 +241,10 @@ export class DrawRender {
     this.data.checkNodeList = val
   }
 
+  public setRapSetList (val: Array<RaphaelSet<"SVG" | "VML">>) {
+    this.rapSetList = val
+  }
+
   // 改变选中的节点
   public changeCheckTopic(node: Node) {
     this.data.checkNodeList.forEach(item => item.shape.attr(NONE_BORDER))
@@ -251,21 +256,51 @@ export class DrawRender {
   }
 
   // 节点点击事件
-  private topicClickEvent (e: Event, that: any, node: Node) {
-    e.stopPropagation()
+  private topicClickEvent (e: Event, node: Node) {
     // 移动至可视区域
-    that.moveViewArea(node.shape.node)
+    this.moveViewArea(node.shape.node)
     // // 编辑的时候触发了点击则失焦
-    if (that.editTopic?.editStatus) {
-      that.editTopic.editInput?.blur()
+    if (this.editTopic?.editStatus) {
+      this.editTopic.editInput?.blur()
     }
-    that.changeCheckTopic(node)
+    this.changeCheckTopic(node)
+  }
+
+  // 事件委托处理点击事件
+  private paperClick () {
+    const that = this
+    const mousedownName = isMobile ? 'touchstart' : 'click';
+    this.paper.getPaper().canvas.addEventListener(mousedownName, function (e: Event) {
+      const target: any = e.target
+      if (target.getAttribute('class') === 'topic') {
+        const ele = that.getSetNode(target.raphaelid)
+        if (ele) {
+          const node = ele.data('node')
+          that.topicClickEvent(e, node)
+        }
+      }
+    })
+  }
+
+  // 获取集合里的node节点
+  public getSetNode (raphaelid: number) {
+    const len = this.rapSetList.length
+    let node = null
+    for (let i = 0;i < len; i++) {
+      const set = this.rapSetList[i]
+      const setlen = set.length
+      if (raphaelid === set[setlen - 1].id) {
+        node = set[setlen - 1]
+        break;
+      }
+    }
+    return node
   }
 
   // 移动至可视区域
   public moveViewArea (node: SVGRectElement | Element) {
     this.clearClickStatus()
-    const {width, height} = this.paper
+    const {width, height} = this.paper.getPaper()
     // // 当元素被遮挡时，让其完全出现可视区域
     let { top, left, right, bottom } = node.getBoundingClientRect()
     right = width - right
@@ -278,7 +313,7 @@ export class DrawRender {
       UDLR.forEach((item, i) => {
         (item < 0) &&  event[i](item);
       })
-      this.paper.setViewBox(moveX, moveY, this.viewport.getScaleOption().w, this.viewport.getScaleOption().h, false);
+      this.paper.getPaper().setViewBox(moveX, moveY, this.viewport.getScaleOption().w, this.viewport.getScaleOption().h, false);
     }
   }
 
@@ -299,9 +334,5 @@ export class DrawRender {
     this.data.checkNodeList.forEach(item => item.shape.attr(NONE_BORDER));
     changeIconDisabled(null, operateList);
     this.editTopic?.blurInput()
-  }
-
-  public clear(): void {
-    this.paper.clear();
   }
 }

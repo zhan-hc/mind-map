@@ -2,7 +2,7 @@ import { operateTotalType, operateType } from '../constant/operate'
 import { textPadding } from '../constant'
 import Node, { ImageData, createNode, getChildNodeData } from '../common/node/node'
 import AddImage from '../common/operate/addImage'
-import { forTreeEvent, getTextWidth } from '../utils/common'
+import { getTextWidth } from '../utils/common'
 export default function () {
 
 

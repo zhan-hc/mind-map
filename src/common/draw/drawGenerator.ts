@@ -1,4 +1,4 @@
-import type { RaphaelPaper, RaphaelReadAttributes } from 'raphael';
+import type { RaphaelAttributes, RaphaelPaper } from 'raphael';
 import { positionOption, connectPositionOption } from '../position';
 import { EXPAND_CIRCLE } from '../../constant/attr';
 import { ImageData } from '../node/node';
@@ -24,7 +24,7 @@ class DrawGenerator {
     this.paper = paper
   }
   // 绘制线
-  public drawLine (linePath: string, attr?: RaphaelReadAttributes) {
+  public drawLine (linePath: string, attr?: RaphaelAttributes) {
     const line = this.paper.path(linePath)
     if (attr) {
       line.attr(attr)
@@ -33,7 +33,7 @@ class DrawGenerator {
   }
 
   // 绘制文本
-  public drawText (position: positionOption, text: string, attr?: RaphaelReadAttributes) {
+  public drawText (position: positionOption, text: string, attr?: RaphaelAttributes) {
     const paperText = this.paper.text(position.x, position.y, text)
     if (attr) {
       paperText.attr(attr)
@@ -43,7 +43,7 @@ class DrawGenerator {
   }
 
   // 绘制圆
-  public drawCircle (position: circleOption, attr?: RaphaelReadAttributes) {
+  public drawCircle (position: circleOption, attr?: RaphaelAttributes) {
     const circle = this.paper.circle(position.x, position.y, position.radius)
     if (attr) {
       circle.attr(attr)
@@ -76,7 +76,7 @@ class DrawGenerator {
   }
 
   // 绘制矩形
-  public drawRect (rectOption: rectOption, attr?: RaphaelReadAttributes, data?: rectData) {
+  public drawRect (rectOption: rectOption, attr?: RaphaelAttributes, data?: rectData) {
     const rect = this.paper.rect(rectOption.x, rectOption.y, rectOption.width, rectOption.height, rectOption.radius);
     if (attr) {
       rect.attr(attr)
