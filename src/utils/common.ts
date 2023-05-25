@@ -1,7 +1,7 @@
 import Node from '../common/node/node'
 import { NodeInfo, NodeTypeId } from '../common/node/helper'
 import { getNodeLevel } from './nodeUtils';
-import { operateOption, operateType } from '../constant/operate'
+import { lineOption, operateOption, operateType } from '../constant/operate'
 
 
 // 生成随机id
@@ -62,6 +62,11 @@ export function changeIconDisabled (checkNodes: Array<Node> | null, operateList:
   }
 }
 
+export function changeLineType (lineList: lineOption[], checkVal:number) {
+  lineList.forEach(item => {
+    item.checked = (item.value === checkVal)
+  })
+}
 
 // 获取assets静态资源
 export function getAssetsFile (url: string) {

@@ -6,11 +6,11 @@ import Position from "../common/position"
 import Tree from "../common/tree"
 import { DRAW_CALLBACK_TYPE, ExtraOption } from '../common/draw/type'
 import Node, { ImageData, getInitData } from '../common/node/node'
-import { operateTotalType, operateType } from '../constant/operate'
+import { lineList, operateTotalType, operateType } from '../constant/operate'
 import EditTopic from '../common/operate/editTopic'
 import useOperate from './useOperate'
-import { forTreeEvent, getLocalStorage } from '../utils/common'
-import { dataKey } from '../constant'
+import { changeLineType, forTreeEvent, getLocalStorage } from '../utils/common'
+import { dataKey, optionKey } from '../constant'
 import { arrayToTree, treeToFlat } from '../utils/nodeUtils'
 import { uploadImage } from '../services/upload'
 import { hideLoading, showLoading } from '../utils/loading'
@@ -41,6 +41,7 @@ export default function () {
    */
   function initPaper (options: ExtraOption) {
     const nodeData = getLocalStorage(dataKey)
+    const optionData = getLocalStorage(optionKey)
     data.tree = new Tree({data: getInitData()});
     // 如果缓存中有数据
     if (nodeData) {
@@ -49,6 +50,10 @@ export default function () {
     data.paper = new Paper('#paper');
     data.drawGenerator = new DrawGenerator(data.paper.getPaper());
     data.drawRender = new DrawRender(data.paper, {...options, tree: data.tree});
+    if (optionData && JSON.parse(optionData).lineType) {
+      changeLineType(lineList, JSON.parse(optionData).lineType)
+      data.drawRender.setLineType(JSON.parse(optionData).lineType)
+    }
     reDraw();
     // 默认选中根节点
     data.drawRender.changeCheckTopic(data.tree?.getRoot() as Node)
@@ -135,8 +140,15 @@ export default function () {
       })
     }
     localStorage.setItem(dataKey, JSON.stringify(treeToFlat(data.tree?.getRoot())))
+    localStorage.setItem(optionKey, JSON.stringify({lineType: lineList.find(item => item.checked)?.value}))
     hideLoading()
     ElMessage.success({ message: '保存数据成功' })
+  }
+
+  function handleCommand (lineVal: number) {
+    changeLineType(lineList, lineVal)
+    data.drawRender?.setLineType(lineVal)
+    reDraw()
   }
 
   return {
@@ -144,6 +156,7 @@ export default function () {
     initPaper,
     reDraw,
     handleEditBlur,
+    handleCommand,
     handleOperateFunc
   }
 }

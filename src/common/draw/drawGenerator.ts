@@ -121,6 +121,7 @@ class DrawGenerator {
 
     return pathStr
   }
+  
 
   // 曲线
   private createConnectPathStr (x1: number, y1: number, x2: number, y2: number): string {
@@ -136,5 +137,10 @@ class DrawGenerator {
 
     return `M${x1} ${y1}C${control1X} ${control1Y} ${control2X} ${control2Y} ${x2} ${y2}`;
   };
+
+  // 折线
+  public brokenPath (startPosition: positionOption, endPosition: positionOption) {
+    return `M ${startPosition.x} ${startPosition.y} L ${startPosition.x + 15} ${startPosition.y} L ${startPosition.x + 15} ${endPosition.y} L ${endPosition.x} ${endPosition.y}`
+  }
 }
 export default DrawGenerator

@@ -62,9 +62,7 @@ export class NodeDrag {
       this.insertArea?.father && node.setSort(this.insertArea?.insertIndex)
       // 拖拽的节点更改属性
       node.setAttr({
-        ...node.attr,
-        lineStartX: undefined,
-        lineStartY: undefined
+        ...node.attr
       })
       // 给node的插入的父节点插入node
       this.insertArea?.father.pushChild(node)

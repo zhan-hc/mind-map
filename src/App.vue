@@ -4,10 +4,10 @@ import operate from './components/operate.vue';
 import scale from './components/scale.vue';
 import useDraw from './hooks/useDraw';
 import useScale from './hooks/useScale';
-import { operateList } from './constant/operate';
+import { lineList, operateList } from './constant/operate';
 import { Viewport } from './common/viewport'
 
-  const { drawRender, initPaper, handleEditBlur, handleOperateFunc } = useDraw()
+  const { drawRender, initPaper, handleEditBlur, handleOperateFunc, handleCommand } = useDraw()
   const { ratio, changeRatio } = useScale()
 
 
@@ -26,7 +26,7 @@ import { Viewport } from './common/viewport'
 </script>
 
 <template>
-  <operate @handleOperate="handleOperateFunc" :operateList="operateList"></operate>
+  <operate :operateList="operateList" :lineList="lineList" @handleOperate="handleOperateFunc" @handleCommand="handleCommand"></operate>
   <div id="paper" style="width:100vw;height:100vh;">
     <div class="edit-wrap">
       <div class="edit-text" contenteditable="true" @blur="handleEditBlur"></div>

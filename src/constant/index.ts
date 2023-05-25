@@ -1,4 +1,8 @@
 export const dataKey = 'mind-map_node-data'
+export const optionKey = 'mind-map_optionKey'
+export interface dataOption {
+  lineType: number
+}
 
 export const moduleInterval = 50 // 模块左右间隔
 export const modulePadding = 25 // 模块上下间隔
@@ -20,4 +24,12 @@ export const VIEWPORT_SIZE = {
 export const IMG_SIZE = {
   width: 300,
   height: 300
+}
+
+export const LINE_TYPE = {
+  DEFAULT: 1, 
+  BROKEN: 2,
+  BROKEN_RADIU: 3,
+  BROKEN_BIAS: 4
+  
 }

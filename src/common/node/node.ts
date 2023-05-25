@@ -8,8 +8,6 @@ export interface shapeAttr {
   y: number;
   width: number;
   height: number;
-  lineStartX?: number;
-  lineStartY?: number;
 }
 export interface NodeOptions {
   id: string;

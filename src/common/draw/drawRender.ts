@@ -1,7 +1,7 @@
 import type { RaphaelElement, RaphaelAttributes, RaphaelSet } from 'raphael';
 import { changeIconDisabled, forTreeEvent, getCenterXY, getRectData, isMobile } from '../../utils/common'
 import { getNodeCenterPosition,  getNodeLevel,  getNodeRectAttr, getNodeRectBorder, getNodeRectInfo, getNodeTextAttr } from '../../utils/nodeUtils'
-import { dragNodeInfo, textPadding } from '../../constant'
+import { LINE_TYPE, dragNodeInfo, textPadding } from '../../constant'
 import { operateList } from '../../constant/operate'
 import Node, { shapeAttr } from '../node/node';
 import { Paper } from '../paper';
@@ -16,6 +16,7 @@ import { Ref, reactive, ref } from 'vue';
 import Tree from '../tree';
 import { NodeDrag } from '../node/node-drag';
 import { NodeExpand } from '../node/node-expand';
+import { ConnectLine } from './line';
 export interface Option extends ExtraOption {
   tree: Tree | null
 }
@@ -28,6 +29,7 @@ export class DrawRender {
   public viewport: Viewport;
   public data: renderData;
   public tree: Tree | null | undefined; // 树节点
+  private lineType: number; // 连接线类型
   private editTopic: EditTopic | null; // 编辑
   private operateStatus: Ref<string>; // 操作状态
   private rapSetList: Array<RaphaelSet<"SVG" | "VML">>; // 每个节点的集合
@@ -41,6 +43,7 @@ export class DrawRender {
     this.ratio = option.ratio && option.ratio.value
     this.data = reactive({ checkNodeList: [] })
     this.rapSetList = []
+    this.lineType = 1
     this.viewport = new Viewport(paper, {
       ratio: option?.ratio || ref(0), 
       operateStatus: this.operateStatus, 
@@ -178,38 +181,15 @@ export class DrawRender {
   public drawLine (node: any, attr?: RaphaelAttributes) {
     const pNode = node.father
     if (!pNode) return
-    // 节点的中心坐标
-    const centerPosition = {
-      x: pNode.attr.x +  0.5 * pNode.attr.width,
-      y: pNode.attr.y + 0.5 * pNode.attr.height
-    }
     let linePath = '';
+    const cline = new ConnectLine(this.lineType)
+    // 是否是第一层节点，即与root连接的节点
+    const firstLevel = getNodeLevel(node) === NodeLevel.second
     // 绘制当前节点的链接线
-    if (getNodeLevel(node) === NodeLevel.second) { // 第一层节点
-      const endPosition = {
-        x: node.attr.x +  0.5 * node.attr.width,
-        y: node.attr.y + 0.5 * node.attr.height
-      }
-      linePath = this.drawGenerator.drawFirstLine(centerPosition, endPosition)
+    if (firstLevel) {
+      linePath = cline.getLinePath(firstLevel, pNode, node)
     } else {
-      // 如果父节点有起始坐标则使用否则用默认坐标
-      const startPosition = {
-        x: pNode.attr.lineStartX ? pNode.attr.lineStartX : (pNode.attr.x + pNode.attr.width),
-        y: pNode.attr.lineStartY ? pNode.attr.lineStartY : (centerPosition.y)
-      }
-      // 下次该子节点有子节点的时候其连接线的起始位置为节点矩形的右下角
-      node.setAttr && node.setAttr({
-        ...node.attr,
-        lineStartX: node.attr.x + node.attr.width,
-        lineStartY: node.attr.y + node.attr.height
-      })
-      const endPosition = {
-        leftX: node.attr.x,
-        leftY: node.attr.y + node.attr.height ,
-        rightX: node.attr.lineStartX,
-        rightY: node.attr.lineStartY
-      } as connectPositionOption
-      linePath = this.drawGenerator.drawChildLine(startPosition, endPosition)
+      linePath = cline.getLinePath(firstLevel, pNode, node)
     }
     const drawAttr = attr ?? DEFAULT_LINE_WIDTH as RaphaelAttributes
     const line = this.drawGenerator.drawLine(linePath, drawAttr)
@@ -228,6 +208,10 @@ export class DrawRender {
     return containerDom
   }
 
+
+  public setLineType (type: number) {
+    this.lineType = type
+  }
 
   public setEditTopic (edit: EditTopic) {
     this.editTopic = edit

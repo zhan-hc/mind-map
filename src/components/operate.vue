@@ -1,27 +1,38 @@
 <script setup lang="ts">
-import { toRefs } from 'vue'
-import { operateOption } from '../constant/operate'
+import { computed, toRefs } from 'vue'
+import { lineOption, operateOption } from '../constant/operate'
+import { ElDropdown } from 'element-plus'
 import { ElTooltip } from 'element-plus'
 const props = defineProps({
   operateList: {
     type: Array<operateOption>,
     default: () => []
+  },
+  lineList: {
+    type: Array<lineOption>,
+    default: () => []
   }
 })
 
+const checkLine = computed(() => props.lineList.find(item => item.checked))
+
 const { operateList }  = toRefs(props)
-const emit  = defineEmits(['handleOperate'])
+const emit  = defineEmits(['handleOperate', 'handleCommand'])
 
 function handleOperate (item: operateOption): void {
   if (!item.disabled) {
     emit('handleOperate', item.type)
   }
 }
+
+function handleCommand (item:lineOption) {
+  !item.checked && emit('handleCommand', item.value)
+}
 </script>
 
 <template>
   <div class="wrap">
-    <div class="operate-main" v-for="(item, i) in operateList.slice(0, 2)" :key="i" >
+    <div class="operate-main" v-for="(item, i) in operateList.slice(0, 2)" :key="i">
       <el-tooltip
         class="box-item"
         effect="dark"
@@ -33,7 +44,7 @@ function handleOperate (item: operateOption): void {
       </el-tooltip>
     </div>
     <div class="split-line"></div>
-    <div class="operate-main" v-for="(item, i) in operateList.slice(2, 5)" :key="i" >
+    <div class="operate-main" v-for="(item, i) in operateList.slice(2, 5)" :key="i">
       <el-tooltip
         class="box-item"
         effect="dark"
@@ -45,7 +56,20 @@ function handleOperate (item: operateOption): void {
       </el-tooltip>
     </div>
     <div class="split-line"></div>
-    <div class="operate-main" v-for="(item, i) in operateList.slice(5)" :key="i" >
+    <div class="operate-main">
+      <el-dropdown @command="handleCommand">
+        <div class="operate-item" :class="checkLine?.icon"></div>
+        <template #dropdown>
+          <el-dropdown-menu>
+            <el-dropdown-item v-for="(item, i) in lineList" :key="i" :command="item">
+              <div class="line-item" :class="[item.icon, item.checked ? 'checked' : '']"></div>
+            </el-dropdown-item>
+          </el-dropdown-menu>
+        </template>
+      </el-dropdown>
+    </div>
+    <div class="split-line"></div>
+    <div class="operate-main" v-for="(item, i) in operateList.slice(5)" :key="i">
       <el-tooltip
         class="box-item"
         effect="dark"
@@ -103,5 +127,14 @@ function handleOperate (item: operateOption): void {
 .disabled {
   opacity: .3;
   cursor: default !important;
+}
+
+.checked {
+  border: 1px solid #3498db !important;
+}
+
+.line-item {
+  width: 20px;
+  height: 20px;
 }
 </style>
