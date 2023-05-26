@@ -3,6 +3,7 @@ import { onMounted, ref } from 'vue';
 import operate from './components/operate.vue';
 import scale from './components/scale.vue';
 import color from './components/color.vue'
+import contact from './components/contact.vue'
 import useDraw from './hooks/useDraw';
 import useScale from './hooks/useScale';
 import useColor from './hooks/useColor';
@@ -41,6 +42,7 @@ import { isMobile } from './utils/common';
     </div>
   </div>
   <scale :ratio="ratio" @handleZoom="handleZoomFunc"></scale>
+  <contact  v-if="!isMobile" />
 </template>
 
 <style scoped>

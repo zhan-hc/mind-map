@@ -74,7 +74,6 @@ const changeLine = (color:string | null) => {
   flex-direction: column;
   width: 260px;
   padding: 15px;
-  /* transform: translateY(-20%); */
   background: #fff;
   border-radius: 5px;
   box-sizing: border-box;

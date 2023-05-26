@@ -11,5 +11,7 @@ import 'element-plus/theme-chalk/el-dropdown.css';
 import 'element-plus/theme-chalk/el-dropdown-menu.css';
 import 'element-plus/theme-chalk/el-dropdown-item.css';
 import 'element-plus/theme-chalk/el-color-picker.css'
-
-createApp(App).mount('#app')
+// import vClipboard from 'v-clipboard';
+const app = createApp(App);
+// app.use(vClipboard);
+app.mount('#app');

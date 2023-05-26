@@ -8,5 +8,9 @@ export const operateIcons = [
   'i-ant-design-fork-outlined',
   'i-ant-design-save-filled'
 ];
+// 缩放加减icon
 export const scaleIcons = ['i-ant-design-plus-outlined', 'i-ant-design-minus-outlined']
+// 节点连接线类型icon
 export const conLineType = ['', 'i-ant-design-fork-outlined', 'i-ant-design-enter-outlined', 'i-ant-design-rotate-right-outlined', 'i-ant-design-rise-outlined']
+// 联系方式icon
+export const contactIcon = ['i-ant-design-wechat-filled', 'i-ant-design-github-filled']
