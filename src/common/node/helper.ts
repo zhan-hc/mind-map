@@ -1,11 +1,14 @@
+import { reactive } from "vue";
+
 export enum NodeTypeId {
   root = '1'
 }
-export const NodeInfo: any = {
+export const NodeInfo: any = reactive({
   first: {
     fontSize: 20,
     fontColor: '#ffffff',
     fillColor: '#3f89de',
+    borderColor: 'rgba(0,0,0,0)',
     textPadding: 18,
     attr: {
       width: 120,
@@ -16,6 +19,7 @@ export const NodeInfo: any = {
     fontSize: 16,
     fontColor: '#000000',
     fillColor: '#f5f5f5',
+    borderColor: 'rgba(0,0,0,0)',
     textPadding: 16,
     attr: {
       width: 100,
@@ -25,14 +29,15 @@ export const NodeInfo: any = {
   others: {
     fontSize: 14,
     fontColor: '#000000',
-    fillColor: 'transparent',
+    fillColor: 'rgba(0,0,0,0)',
+    borderColor: 'rgba(0,0,0,0)',
     textPadding: 12,
     attr: {
       width: 80,
       height: 40
     }
   }
-}
+})
 export enum NodeLevel {
   first = 'first',
   second = 'second',

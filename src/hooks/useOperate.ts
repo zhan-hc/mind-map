@@ -13,7 +13,7 @@ export default function () {
       const newNode = createNode(getChildNodeData(type, checkNode));
       (type === operateType.addTopic) && checkNode.father?.insertAfterChild(checkNode, newNode);
       (type === operateType.addSubTopic) && checkNode.pushChild(newNode);
-      callbackObject[operateTotalType.ADD] && callbackObject[operateTotalType.ADD](newNode.id)
+      callbackObject[operateTotalType.ADD] && callbackObject[operateTotalType.ADD](newNode)
     }
     // 编辑节点
     else if (type === operateType.editTopic) {

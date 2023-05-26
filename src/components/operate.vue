@@ -31,7 +31,7 @@ function handleCommand (item:lineOption) {
 </script>
 
 <template>
-  <div class="wrap">
+  <div class="operate-wrap">
     <div class="operate-main" v-for="(item, i) in operateList.slice(0, 2)" :key="i">
       <el-tooltip
         class="box-item"
@@ -85,7 +85,7 @@ function handleCommand (item:lineOption) {
 </template>
 
 <style scoped>
-.wrap {
+.operate-wrap {
   z-index: 999;
   position: fixed;
   top: 20px;

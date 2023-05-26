@@ -10,7 +10,7 @@ import { DRAW_CALLBACK_TYPE, ExtraOption, OPERATE_STATUS } from './type';
 import { Viewport } from '../viewport';
 import { connectPositionOption, insertAreaOption } from '../position';
 import { NodeLevel, NodeTypeId } from '../node/helper';
-import { CLICK_RECT_BORDER, DEFAULT_LINE_WIDTH, DRAG_PLACEHOLDER_LINE, DRAG_PLACEHOLDER_RECT, HOVER_RECT_BORDER, NONE_BORDER } from '../../constant/attr';
+import { CLICK_RECT_BORDER, DEFAULT_LINE_WIDTH, DRAG_PLACEHOLDER_LINE, DRAG_PLACEHOLDER_RECT, HOVER_RECT_BORDER, NONE_BORDER, lineColor } from '../../constant/attr';
 import EditTopic from '../operate/editTopic';
 import { Ref, reactive, ref } from 'vue';
 import Tree from '../tree';
@@ -77,7 +77,7 @@ export class DrawRender {
     st.push(text)
 
     // 节点连接线
-    const line = this.drawLine(node)
+    const line = this.drawLine(node, {stroke: lineColor.value, 'stroke-width': 2} as RaphaelAttributes)
     if (line) {
       st.push(line)
     }
@@ -122,7 +122,7 @@ export class DrawRender {
       const nodeDrag = new NodeDrag()
       wrapRect.drag(
         function onmove (x, y, cx, cy, e) {
-          that.setDragStatus(OPERATE_STATUS.DRAG)
+          that.setOperateStatus(OPERATE_STATUS.DRAG)
           nodeDrag.dragMove({cx, cy}, cb[NodeTypeId.root], node, that.drawDragRect.bind(that))
         },
         function onstart (x,y,e) {
@@ -130,7 +130,7 @@ export class DrawRender {
           that.changeCheckTopic(node)
         },
         function onend (e) {
-          that.setDragStatus(OPERATE_STATUS.NULL)
+          that.setOperateStatus(OPERATE_STATUS.NULL)
           nodeDrag.dragEnd(node, cb[DRAW_CALLBACK_TYPE.DRAG])
         }
       )
@@ -217,7 +217,7 @@ export class DrawRender {
     this.editTopic = edit
   }
 
-  public setDragStatus (val: string) {
+  public setOperateStatus (val: string) {
     this.operateStatus.value = val
   }
 
@@ -243,7 +243,7 @@ export class DrawRender {
   private topicClickEvent (e: Event, node: Node) {
     // 移动至可视区域
     this.moveViewArea(node.shape.node)
-    // // 编辑的时候触发了点击则失焦
+    // 编辑的时候触发了点击则失焦
     if (this.editTopic?.editStatus) {
       this.editTopic.editInput?.blur()
     }
@@ -262,6 +262,8 @@ export class DrawRender {
           const node = ele.data('node')
           that.topicClickEvent(e, node)
         }
+      } else {
+        that.setCheckNodeList([])
       }
     })
   }

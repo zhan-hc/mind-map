@@ -4,7 +4,7 @@ import { DrawRender } from "../common/draw/drawRender"
 import { Paper } from "../common/paper"
 import Position from "../common/position"
 import Tree from "../common/tree"
-import { DRAW_CALLBACK_TYPE, ExtraOption } from '../common/draw/type'
+import { DRAW_CALLBACK_TYPE, ExtraOption, OPERATE_STATUS } from '../common/draw/type'
 import Node, { ImageData, getInitData } from '../common/node/node'
 import { lineList, operateTotalType, operateType } from '../constant/operate'
 import EditTopic from '../common/operate/editTopic'
@@ -15,6 +15,8 @@ import { arrayToTree, treeToFlat } from '../utils/nodeUtils'
 import { uploadImage } from '../services/upload'
 import { hideLoading, showLoading } from '../utils/loading'
 import { ElMessage } from 'element-plus'
+import { NodeInfo } from '../common/node/helper'
+import { lineColor } from '../constant/attr'
 
 interface dataOption {
   tree:  Tree | null;
@@ -41,19 +43,15 @@ export default function () {
    */
   function initPaper (options: ExtraOption) {
     const nodeData = getLocalStorage(dataKey)
-    const optionData = getLocalStorage(optionKey)
     data.tree = new Tree({data: getInitData()});
-    // 如果缓存中有数据
+    // 如果缓存中有节点数据
     if (nodeData) {
       data.tree.setRoot(arrayToTree(JSON.parse(nodeData))[0])
     }
+    initSetData()
     data.paper = new Paper('#paper');
     data.drawGenerator = new DrawGenerator(data.paper.getPaper());
     data.drawRender = new DrawRender(data.paper, {...options, tree: data.tree});
-    if (optionData && JSON.parse(optionData).lineType) {
-      changeLineType(lineList, JSON.parse(optionData).lineType)
-      data.drawRender.setLineType(JSON.parse(optionData).lineType)
-    }
     reDraw();
     // 默认选中根节点
     data.drawRender.changeCheckTopic(data.tree?.getRoot() as Node)
@@ -98,7 +96,10 @@ export default function () {
    */
   function handleOperateFunc (type: operateType) {
     data.callbacks = {
-      [operateTotalType.ADD]: (id: string) => reDraw(id),
+      [operateTotalType.ADD]: (node: Node) => {
+        reDraw(node.id)
+        data.drawRender?.changeCheckTopic(node)
+      },
       [operateTotalType.EDIT]: () => editTopic?.editText(data.drawRender?.data.checkNodeList[0] as Node, data.drawRender?.ratio as number),
       [operateTotalType.IMG]: (id: string) => reDraw(id),
       [operateTotalType.DELETE]: () => reDraw(),
@@ -140,9 +141,36 @@ export default function () {
       })
     }
     localStorage.setItem(dataKey, JSON.stringify(treeToFlat(data.tree?.getRoot())))
-    localStorage.setItem(optionKey, JSON.stringify({lineType: lineList.find(item => item.checked)?.value}))
+    localStorage.setItem(optionKey, JSON.stringify({
+      lineType: lineList.find(item => item.checked)?.value,
+      nodeInfo: NodeInfo,
+      lineColor: lineColor.value
+    }))
     hideLoading()
     ElMessage.success({ message: '保存数据成功' })
+  }
+
+  // 初始化设置缓存配置信息
+  function initSetData () {
+    const optionData = getLocalStorage(optionKey)
+    // 设置保存的值
+    if (optionData) {
+      const options = JSON.parse(optionData)
+      // 线条类型
+      if (options.lineType) {
+        changeLineType(lineList, JSON.parse(optionData).lineType)
+        data.drawRender?.setLineType(JSON.parse(optionData).lineType)
+      }
+      // 节点信息
+      if (options.nodeInfo) {
+        Object.keys(options.nodeInfo).forEach(level => {
+          NodeInfo[level] = options.nodeInfo[level]
+        })
+      }
+      if (options.lineColor) {
+        lineColor.value = options.lineColor
+      }
+    }
   }
 
   function handleCommand (lineVal: number) {

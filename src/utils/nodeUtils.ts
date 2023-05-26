@@ -36,7 +36,8 @@ export function getNodeRectBorder (node: Node,  radius: number, padding: number 
 export function getNodeRectAttr (node: Node, type: 0|1) {
   return {
     fill: type ? 'transparent' : NodeInfo[getNodeLevel(node)].fillColor,
-    'stroke-width': 0
+    'stroke-width': 2,
+    'stroke': type ? 'none' : NodeInfo[getNodeLevel(node)].borderColor
   }
 }
 

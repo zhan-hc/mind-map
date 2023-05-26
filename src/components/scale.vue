@@ -18,7 +18,7 @@ function handleZoom (type: 1|0): void {
 </script>
 
 <template>
-  <div class="wrap">
+  <div class="scale-wrap">
     <div class="icon" :class="scaleIcons[1]" @click="handleZoom(0)"></div>
     <div>{{ratio}}%</div>
     <div class="icon" :class="scaleIcons[0]" @click="handleZoom(1)"></div>
@@ -27,7 +27,7 @@ function handleZoom (type: 1|0): void {
 </template>
 
 <style scoped>
-.wrap {
+.scale-wrap {
   z-index: 999;
   position: fixed;
   bottom: 20px;

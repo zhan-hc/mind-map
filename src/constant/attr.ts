@@ -4,6 +4,7 @@
  */
 
 import { RaphaelAttributes } from "raphael"
+import { ref } from "vue"
 
 // 边框为0
 export const NONE_BORDER = {
@@ -16,6 +17,9 @@ export const DEFAULT_LINE_WIDTH = {
   'stroke-width': 2,
   'stroke-opacity': 1
 }
+
+//节点连接线的颜色
+export const lineColor = ref('#000000')
 
 /**
  * 节点点击悬浮相关

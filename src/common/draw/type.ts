@@ -12,5 +12,6 @@ export interface ExtraOption {
 
 export const OPERATE_STATUS = {
   NULL: '',
-  DRAG: 'drag'
+  DRAG: 'drag',
+  EDIT: 'edit'
 }

@@ -1,14 +1,19 @@
 <script setup lang="ts">
-import { onMounted } from 'vue';
+import { onMounted, ref } from 'vue';
 import operate from './components/operate.vue';
 import scale from './components/scale.vue';
+import color from './components/color.vue'
 import useDraw from './hooks/useDraw';
 import useScale from './hooks/useScale';
+import useColor from './hooks/useColor';
 import { lineList, operateList } from './constant/operate';
 import { Viewport } from './common/viewport'
+import { isMobile } from './utils/common';
 
-  const { drawRender, initPaper, handleEditBlur, handleOperateFunc, handleCommand } = useDraw()
+  const { drawRender, initPaper, handleEditBlur, handleOperateFunc, handleCommand, reDraw } = useDraw()
   const { ratio, changeRatio } = useScale()
+  const { changeColor, changeLine } = useColor()
+  const colorStatus = ref(false)
 
 
   // 缩放
@@ -20,6 +25,8 @@ import { Viewport } from './common/viewport'
     initPaper({
       ratio
     })
+    // 父组件数据初始化完之后再渲染color组件，否则会因为渲染顺序问题导致color显示的是默认数据
+    colorStatus.value = true
   })
 
 
@@ -27,6 +34,7 @@ import { Viewport } from './common/viewport'
 
 <template>
   <operate :operateList="operateList" :lineList="lineList" @handleOperate="handleOperateFunc" @handleCommand="handleCommand"></operate>
+  <color v-if="!isMobile && colorStatus" @changeColor="changeColor($event, reDraw)" @changeLine="changeLine($event, reDraw)"/>
   <div id="paper" style="width:100vw;height:100vh;">
     <div class="edit-wrap">
       <div class="edit-text" contenteditable="true" @blur="handleEditBlur"></div>
