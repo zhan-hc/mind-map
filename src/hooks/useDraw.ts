@@ -16,7 +16,7 @@ import { uploadImage } from '../services/upload'
 import { hideLoading, showLoading } from '../utils/loading'
 import { ElMessage } from 'element-plus'
 import { NodeInfo } from '../common/node/helper'
-import { lineColor } from '../constant/attr'
+import { LINE_COLOR } from '../constant/attr'
 
 interface dataOption {
   tree:  Tree | null;
@@ -94,7 +94,7 @@ export default function () {
    * 节点操作事件
    * @param type 
    */
-  function handleOperateFunc (type: operateType) {
+  function handleOperateFunc (type: operateType, crud: number) {
     data.callbacks = {
       [operateTotalType.ADD]: (node: Node) => {
         reDraw(node.id)
@@ -105,7 +105,7 @@ export default function () {
       [operateTotalType.DELETE]: () => reDraw(),
       [operateTotalType.SAVE]: () => saveData()
     }
-    handleOperate(data.drawRender?.data.checkNodeList as Array<Node>, type, data.callbacks)
+    handleOperate(data.drawRender?.data.checkNodeList as Array<Node>, {type, crud}, data.callbacks)
   }
   /**
    * 编辑框失焦事件
@@ -144,7 +144,7 @@ export default function () {
     localStorage.setItem(optionKey, JSON.stringify({
       lineType: lineList.find(item => item.checked)?.value,
       nodeInfo: NodeInfo,
-      lineColor: lineColor.value
+      LINE_COLOR: LINE_COLOR.value
     }))
     hideLoading()
     ElMessage.success({ message: '保存数据成功' })
@@ -167,8 +167,8 @@ export default function () {
           NodeInfo[level] = options.nodeInfo[level]
         })
       }
-      if (options.lineColor) {
-        lineColor.value = options.lineColor
+      if (options.LINE_COLOR) {
+        LINE_COLOR.value = options.LINE_COLOR
       }
     }
   }

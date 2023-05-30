@@ -1,22 +1,23 @@
 import type { RaphaelElement, RaphaelAttributes, RaphaelSet } from 'raphael';
 import { changeIconDisabled, forTreeEvent, getCenterXY, getRectData, isMobile } from '../../utils/common'
 import { getNodeCenterPosition,  getNodeLevel,  getNodeRectAttr, getNodeRectBorder, getNodeRectInfo, getNodeTextAttr } from '../../utils/nodeUtils'
-import { LINE_TYPE, dragNodeInfo, textPadding } from '../../constant'
+import { dragNodeInfo, textPadding } from '../../constant'
 import { operateList } from '../../constant/operate'
 import Node, { shapeAttr } from '../node/node';
 import { Paper } from '../paper';
 import DrawGenerator, { rectData } from './drawGenerator';
 import { DRAW_CALLBACK_TYPE, ExtraOption, OPERATE_STATUS } from './type';
 import { Viewport } from '../viewport';
-import { connectPositionOption, insertAreaOption } from '../position';
+import { insertAreaOption } from '../position';
 import { NodeLevel, NodeTypeId } from '../node/helper';
-import { CLICK_RECT_BORDER, DEFAULT_LINE_WIDTH, DRAG_PLACEHOLDER_LINE, DRAG_PLACEHOLDER_RECT, HOVER_RECT_BORDER, NONE_BORDER, lineColor } from '../../constant/attr';
+import { CLICK_RECT_BORDER, DEFAULT_LINE_WIDTH, DRAG_PLACEHOLDER_LINE, DRAG_PLACEHOLDER_RECT, HOVER_RECT_BORDER, NONE_BORDER, LINE_COLOR } from '../../constant/attr';
 import EditTopic from '../operate/editTopic';
 import { Ref, reactive, ref } from 'vue';
 import Tree from '../tree';
 import { NodeDrag } from '../node/node-drag';
 import { NodeExpand } from '../node/node-expand';
 import { ConnectLine } from './line';
+import { useThrottleFn } from '@vueuse/core'
 export interface Option extends ExtraOption {
   tree: Tree | null
 }
@@ -77,7 +78,7 @@ export class DrawRender {
     st.push(text)
 
     // 节点连接线
-    const line = this.drawLine(node, {stroke: lineColor.value, 'stroke-width': 2} as RaphaelAttributes)
+    const line = this.drawLine(node, {stroke: LINE_COLOR.value, 'stroke-width': 2} as RaphaelAttributes)
     if (line) {
       st.push(line)
     }
@@ -120,11 +121,13 @@ export class DrawRender {
     // 拖拽事件
     if (cb && cb[DRAW_CALLBACK_TYPE.DRAG] && !isMobile) {
       const nodeDrag = new NodeDrag()
+      // 节流dragmove
+      const dragMoveHandler = (x: number, y: number, cx: number, cy: number, event: MouseEvent) => {
+        that.setOperateStatus(OPERATE_STATUS.DRAG)
+        nodeDrag.dragMove({cx, cy}, cb[NodeTypeId.root], node, that.drawDragRect.bind(that))
+      }
       wrapRect.drag(
-        function onmove (x, y, cx, cy, e) {
-          that.setOperateStatus(OPERATE_STATUS.DRAG)
-          nodeDrag.dragMove({cx, cy}, cb[NodeTypeId.root], node, that.drawDragRect.bind(that))
-        },
+        useThrottleFn(dragMoveHandler, 100),
         function onstart (x,y,e) {
           that.editTopic?.blurInput()
           that.changeCheckTopic(node)

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, toRefs } from 'vue'
-import { lineOption, operateOption } from '../constant/operate'
+import { lineOption, operateOption, operateType } from '../constant/operate'
 import { ElDropdown } from 'element-plus'
 import { ElTooltip } from 'element-plus'
 const props = defineProps({
@@ -19,9 +19,9 @@ const checkLine = computed(() => props.lineList.find(item => item.checked))
 const { operateList }  = toRefs(props)
 const emit  = defineEmits(['handleOperate', 'handleCommand'])
 
-function handleOperate (item: operateOption): void {
+function handleOperate (item: operateOption, crud: number = 1): void {
   if (!item.disabled) {
-    emit('handleOperate', item.type)
+    emit('handleOperate', item.type, crud)
   }
 }
 
@@ -46,6 +46,7 @@ function handleCommand (item:lineOption) {
     <div class="split-line"></div>
     <div class="operate-main" v-for="(item, i) in operateList.slice(2, 5)" :key="i">
       <el-tooltip
+        v-if="item.type !== operateType.operateImg"
         class="box-item"
         effect="dark"
         :content="item.desc"
@@ -54,6 +55,34 @@ function handleCommand (item:lineOption) {
       >
         <div class="operate-item" :class="[item.icon, item.disabled ? 'disabled' : '']" @click="handleOperate(item)"></div>
       </el-tooltip>
+      <el-dropdown v-else>
+        <div class="operate-item" :class="[item.icon, item.disabled ? 'disabled' : '']"></div>
+        <template #dropdown>
+          <el-dropdown-menu>
+            <el-dropdown-item :command="item">
+              <el-tooltip
+                class="box-item"
+                effect="dark"
+                content="添加图片"
+                placement="right"
+              >
+              <img src="../assets/image/add_img.png" alt="" @click="handleOperate(item, 1)">
+              </el-tooltip>
+            </el-dropdown-item>
+            <el-dropdown-item :command="item">
+              <el-tooltip
+                class="box-item"
+                effect="dark"
+                content="删除图片"
+                placement="right"
+              >
+              <img src="../assets/image/del_img.png" alt=""  @click="handleOperate(item, 0)">
+              </el-tooltip>
+            </el-dropdown-item>
+          </el-dropdown-menu>
+        </template>
+      </el-dropdown>
+
     </div>
     <div class="split-line"></div>
     <div class="operate-main">
@@ -120,6 +149,7 @@ function handleCommand (item:lineOption) {
   position: relative;
   width: 25px;
   height: 25px;
+  color: #000;
 }
 .operate-item:hover {
   cursor: pointer;

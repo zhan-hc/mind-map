@@ -137,7 +137,7 @@ class Node {
   public setFather (node: Node | null) {
     this._father = node
   }
-  public setImageData (imageData: ImageData) {
+  public setImageData (imageData: ImageData | undefined) {
     this._imageData = imageData
   }
 }

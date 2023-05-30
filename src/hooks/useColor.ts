@@ -1,5 +1,5 @@
 import { NodeInfo } from '../common/node/helper'
-import { lineColor } from '../constant/attr'
+import { LINE_COLOR } from '../constant/attr'
 export default function () {
 
   function changeColor ({color, colorKey, level}: {color: string, colorKey:string, level: string}, cb: any) {
@@ -8,7 +8,7 @@ export default function () {
   }
 
   function changeLine (color: string, cb: any) {
-    lineColor.value = color
+    LINE_COLOR.value = color
     cb()
   }
 

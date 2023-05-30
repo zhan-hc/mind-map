@@ -26,8 +26,6 @@ onMounted(() => {
       :key="icon"
       v-for="(icon, i) in contactIcon"
       :class="[icon, icon === 'wechat' ? 'copy-icon' : '']"
-      data-clipboard-text="1497903789"
-      v-clipboard:copy="'textToCopy'"
       @click="handleClick(i)"
     ></div>
   </div>

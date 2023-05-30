@@ -32,7 +32,7 @@ const topicList = reactive([
   }
 ])
 
-const lineColor = ref('#000000')
+const LINE_COLOR = ref('#000000')
 const changeColor = (color:string | null, level:string, colorKey:string) => {
   emit('changeColor', { color, level, colorKey })
 }
@@ -59,7 +59,7 @@ const changeLine = (color:string | null) => {
     <div class="split-line"></div>
     <div class="line">
       <div class="line-label">连接线</div>
-      <div class="line-color"><el-color-picker v-model="lineColor" show-alpha :predefine="predefineColors" @change="changeLine($event)"/></div>
+      <div class="line-color"><el-color-picker v-model="LINE_COLOR" show-alpha :predefine="predefineColors" @change="changeLine($event)"/></div>
     </div>
   </div>
 </template>

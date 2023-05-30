@@ -19,7 +19,7 @@ export const DEFAULT_LINE_WIDTH = {
 }
 
 //节点连接线的颜色
-export const lineColor = ref('#000000')
+export const LINE_COLOR = ref('#000000')
 
 /**
  * 节点点击悬浮相关

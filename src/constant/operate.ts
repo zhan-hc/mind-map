@@ -6,7 +6,7 @@ export enum operateType {
   addTopic = 0,
   addSubTopic,
   editTopic,
-  addImage,
+  operateImg,
   delTopic,
   conLine,
   saveData
@@ -33,6 +33,10 @@ export interface operateOption {
   desc: string
 }
 
+export enum imgType {
+  add = 1,
+  delete = 0
+}
 
 export const operateList: operateOption[] = reactive([
   {
@@ -54,9 +58,9 @@ export const operateList: operateOption[] = reactive([
     desc: '编辑文本'
   },
   {
-    icon: operateIcons[operateType.addImage],
+    icon: operateIcons[operateType.operateImg],
     disabled: true,
-    type: operateType.addImage,
+    type: operateType.operateImg,
     desc: '添加图片'
   },
   {
