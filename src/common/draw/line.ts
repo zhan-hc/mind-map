@@ -2,7 +2,7 @@
  * 节点之间的连接线
  */
 
-import { LINE_TYPE } from "../../constant";
+import { LINE_TYPES } from "../../constant";
 import { getNodeLevel } from "../../utils/nodeUtils";
 import { NodeLevel, NodeTypeId } from "../node/helper";
 import Node from "../node/node";
@@ -17,13 +17,13 @@ export class ConnectLine {
   // 获取连接线
   public getLinePath (firstLevel: boolean, pNode: Node, node: Node) {
     const position:any = this.getLinePositon(pNode, node)
-    if (this.lineType === LINE_TYPE.DEFAULT) {
+    if (this.lineType === LINE_TYPES.DEFAULT) {
       return this.defaultLine(firstLevel, position)
-    } else if (this.lineType === LINE_TYPE.BROKEN) {
+    } else if (this.lineType === LINE_TYPES.BROKEN) {
       return this.brokenPath(position.start, position.end)
-    } else if (this.lineType === LINE_TYPE.BROKEN_RADIU){
+    } else if (this.lineType === LINE_TYPES.BROKEN_RADIU){
       return this.brokenRadiuPath(position.start, position.end)
-    } else if (this.lineType === LINE_TYPE.BROKEN_BIAS) {
+    } else if (this.lineType === LINE_TYPES.BROKEN_BIAS) {
       return this.brokenBiasPath(position.start, position.end)
     } else {
       return ''
@@ -44,7 +44,7 @@ export class ConnectLine {
     }
 
     // 默认连接线
-    if (this.lineType === LINE_TYPE.DEFAULT) {
+    if (this.lineType === LINE_TYPES.DEFAULT) {
        // 第一层节点(与根节点连接那层)
       if (getNodeLevel(node) === NodeLevel.second) {
         return  {
@@ -69,7 +69,7 @@ export class ConnectLine {
           end: deFaultEndPosition
         }
       }
-    } else if (this.lineType === LINE_TYPE.BROKEN) {
+    } else if (this.lineType === LINE_TYPES.BROKEN) {
       return  {
         start: {
           x: pNode.shape.getBBox().x2,
@@ -80,7 +80,7 @@ export class ConnectLine {
           y: endPosition.y
         }
       }
-    } else if (this.lineType === LINE_TYPE.BROKEN_RADIU) {
+    } else if (this.lineType === LINE_TYPES.BROKEN_RADIU) {
       return {
         start: {
           x: pNode.shape.getBBox().x2,
@@ -91,7 +91,7 @@ export class ConnectLine {
           y: endPosition.y
         }
       }
-    } else if (this.lineType === LINE_TYPE.BROKEN_BIAS) {
+    } else if (this.lineType === LINE_TYPES.BROKEN_BIAS) {
       return {
         start: {
           x: pNode.shape.getBBox().x2 - 15,
@@ -175,8 +175,11 @@ export class ConnectLine {
   private brokenRadiuPath (startPosition: positionOption, endPosition: positionOption) {
     return `M ${startPosition.x} ${startPosition.y} 
     L ${startPosition.x + 15} ${startPosition.y} 
-    L ${startPosition.x + 15} ${endPosition.y + (endPosition.y < startPosition.y ? 10 : -10)}
-    A ${10} ${10} ${45} ${0} ${(endPosition.y < startPosition.y ? 1 : 0)} ${startPosition.x + 25} ${endPosition.y} 
+    L ${startPosition.x + 15} ${endPosition.y + ((endPosition.y < startPosition.y) ? 10 : (endPosition.y === startPosition.y) ? 0 : -10)}
+    ${ startPosition.y === endPosition.y ? 
+      `L ${startPosition.x + 25} ${endPosition.y}` : 
+      `A ${10} ${10} ${45} ${0} ${(endPosition.y < startPosition.y ? 1 : 0)} ${startPosition.x + 25} ${endPosition.y}`
+    }
     L ${endPosition.x} ${endPosition.y}`
   }
 

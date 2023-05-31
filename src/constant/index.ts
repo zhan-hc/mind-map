@@ -29,10 +29,9 @@ export const IMG_SIZE = {
 }
 
 // 连接线种类
-export const LINE_TYPE = {
+export const LINE_TYPES = {
   DEFAULT: 1, 
   BROKEN: 2,
   BROKEN_RADIU: 3,
-  BROKEN_BIAS: 4
-  
+  BROKEN_BIAS: 4 
 }

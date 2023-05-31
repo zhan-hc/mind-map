@@ -17,8 +17,4 @@ If the standalone TypeScript plugin doesn't feel fast enough to you, Volar has a
    2. Find `TypeScript and JavaScript Language Features`, right click and select `Disable (Workspace)`
 2. Reload the VSCode window by running `Developer: Reload Window` from the command palette.
 
-
-// 已存在bug
-1. 缩放之后单击选择框获取的鼠标位置不对
-2. 可对图片进行优化删除等功能
-3. 实现保存数据的话，因目前图片是临时链接可能保存的imgurl是临时的
+// 点击事件触发多次changeIconDisabled ，可以通过console排查

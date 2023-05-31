@@ -2,6 +2,7 @@ import Node from '../common/node/node'
 import { NodeInfo, NodeTypeId } from '../common/node/helper'
 import { getNodeLevel } from './nodeUtils';
 import { lineOption, operateOption, operateType } from '../constant/operate'
+import CommandManager from '../common/command/commandManager';
 
 
 // 生成随机id
@@ -22,14 +23,13 @@ export function getTextWidth(node: Node, str = '') {
   return width;
 }
 
-// 改变操作icon的disabled属性
-export function changeIconDisabled (checkNodes: Array<Node> | null, operateList: operateOption[]) {
-  if (checkNodes && !checkNodes.length) return
+// 改变操作icon的disabled属性(不包含撤销与恢复)
+export function changeIconDisabled (checkNodes: Array<Node>, operateList: operateOption[]) {
   // 当选中多个节点时
   if (checkNodes && checkNodes?.length > 1) {
     // 如果多选里面包含根阶段
     const haveRoot = checkNodes.some(item => item.id === NodeTypeId.root)
-    operateList.forEach(item => {
+    operateList.filter(item => ![operateType.execute, operateType.undo].includes(item.type)).forEach(item => {
       if (haveRoot) {
         item.disabled = true
       } else {
@@ -39,16 +39,16 @@ export function changeIconDisabled (checkNodes: Array<Node> | null, operateList:
     return
   }
   // 如果是根节点不能添加兄弟节点和删除节点
-  if (checkNodes !== null && checkNodes[0].id === NodeTypeId.root) {
-    operateList.forEach(item => {
+  if (checkNodes.length === 1 && checkNodes[0].id === NodeTypeId.root) {
+    operateList.filter(item => ![operateType.execute, operateType.undo].includes(item.type)).forEach(item => {
       if (![operateType.addTopic, operateType.delTopic].includes(item.type)) {
         item.disabled = false
       } else {
         item.disabled = true
       }
     })
-  } else if (checkNodes === null) {
-    operateList.forEach(item => {
+  } else if (!checkNodes.length) {
+    operateList.filter(item => ![operateType.execute, operateType.undo].includes(item.type)).forEach(item => {
       if (item.type === operateType.saveData) {
         item.disabled = false
       } else {
@@ -56,10 +56,22 @@ export function changeIconDisabled (checkNodes: Array<Node> | null, operateList:
       }
     })
   } else {
-    operateList.forEach(item => {
+    operateList.filter(item => ![operateType.execute, operateType.undo].includes(item.type)).forEach(item => {
       item.disabled = false
     })
   }
+}
+
+// 改变撤销恢复icon的disabled属性
+export function changeSnapshotDisabled (command: CommandManager, operateList: operateOption[]) {
+  const snapshotIcons = operateList.filter(item => [operateType.execute, operateType.undo].includes(item.type))
+  snapshotIcons.forEach(item => {
+    if (item.type === operateType.undo) {
+      item.disabled = !command.executedCommands.length
+    } else if (item.type === operateType.execute) {
+      item.disabled = (command.curIndex >= command.fullCommands.length - 1)
+    }
+  })
 }
 
 export function changeLineType (lineList: lineOption[], checkVal:number) {

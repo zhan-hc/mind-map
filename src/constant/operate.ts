@@ -1,6 +1,6 @@
-import { LINE_TYPE } from '.'
-import { conLineType, operateIcons } from '../utils/unocss-icon'
-import { reactive } from 'vue'
+import { LINE_TYPES } from '.'
+import { conLineType, operateIcons, snapshotIcon } from '../utils/unocss-icon'
+import { reactive, ref } from 'vue'
 
 export enum operateType {
   addTopic = 0,
@@ -8,14 +8,23 @@ export enum operateType {
   editTopic,
   operateImg,
   delTopic,
-  conLine,
-  saveData
+  saveData,
+  execute,
+  undo
 }
 
+export enum styleType {
+  first = 0,
+  second,
+  others,
+  line,
+  lineColor
+}
 export interface lineOption {
   value: number;
   icon: string;
   checked: boolean;
+  desc: string;
 }
 
 export enum operateTotalType {
@@ -23,7 +32,10 @@ export enum operateTotalType {
   EDIT = 'edit',
   DELETE = 'delete',
   IMG = 'img',
-  SAVE = 'save'
+  SAVE = 'save',
+  STYLE = 'style',
+  EXECUTE = 'execute',
+  UNDO = 'undo'
 }
 
 export interface operateOption {
@@ -74,28 +86,44 @@ export const operateList: operateOption[] = reactive([
     disabled: false,
     type: operateType.saveData,
     desc: '保存数据'
+  },
+  {
+    icon: snapshotIcon[0],
+    disabled: true,
+    type: operateType.undo,
+    desc: '撤回'
+  },
+  {
+    icon: snapshotIcon[1],
+    disabled: true,
+    type: operateType.execute,
+    desc: '恢复'
   }
 ])
 
 export const lineList: lineOption[] = reactive([
   {
-    value: LINE_TYPE.DEFAULT,
-    icon: conLineType[LINE_TYPE.DEFAULT],
-    checked: true
+    value: LINE_TYPES.DEFAULT,
+    icon: conLineType[LINE_TYPES.DEFAULT],
+    checked: true,
+    desc: '默认样式'
   },
   {
-    value: LINE_TYPE.BROKEN,
-    icon: conLineType[LINE_TYPE.BROKEN],
-    checked: false
+    value: LINE_TYPES.BROKEN,
+    icon: conLineType[LINE_TYPES.BROKEN],
+    checked: false,
+    desc: '折线样式'
   },
   {
-    value: LINE_TYPE.BROKEN_RADIU,
-    icon: conLineType[LINE_TYPE.BROKEN_RADIU],
-    checked: false
+    value: LINE_TYPES.BROKEN_RADIU,
+    icon: conLineType[LINE_TYPES.BROKEN_RADIU],
+    checked: false,
+    desc: '圆角折线样式'
   },
   {
-    value: LINE_TYPE.BROKEN_BIAS,
-    icon: conLineType[LINE_TYPE.BROKEN_BIAS],
-    checked: false
+    value: LINE_TYPES.BROKEN_BIAS,
+    icon: conLineType[LINE_TYPES.BROKEN_BIAS],
+    checked: false,
+    desc: '斜线样式'
   }
 ])

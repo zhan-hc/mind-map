@@ -4,19 +4,25 @@ import { DrawRender } from "../common/draw/drawRender"
 import { Paper } from "../common/paper"
 import Position from "../common/position"
 import Tree from "../common/tree"
-import { DRAW_CALLBACK_TYPE, ExtraOption, OPERATE_STATUS } from '../common/draw/type'
-import Node, { ImageData, getInitData } from '../common/node/node'
-import { lineList, operateTotalType, operateType } from '../constant/operate'
+import { DRAW_CALLBACK_TYPE, ExtraOption } from '../common/draw/type'
+import Node, { ImageData, getChildNodeData, getInitData } from '../common/node/node'
+import { lineList, operateList, operateType, styleType } from '../constant/operate'
 import EditTopic from '../common/operate/editTopic'
-import useOperate from './useOperate'
-import { changeLineType, forTreeEvent, getLocalStorage } from '../utils/common'
+import { changeIconDisabled, changeLineType, changeSnapshotDisabled, forTreeEvent, getLocalStorage } from '../utils/common'
 import { dataKey, optionKey } from '../constant'
 import { arrayToTree, treeToFlat } from '../utils/nodeUtils'
 import { uploadImage } from '../services/upload'
 import { hideLoading, showLoading } from '../utils/loading'
 import { ElMessage } from 'element-plus'
 import { NodeInfo } from '../common/node/helper'
-import { LINE_COLOR } from '../constant/attr'
+import { LINE_COLOR, LINE_TYPE } from '../constant/attr'
+import CommandManager from '../common/command/commandManager'
+import AddCommand from '../common/command/addCommand'
+import DelCommand from '../common/command/delCommand'
+import ImgCommand from '../common/command/imgCommand'
+import EditCommand from '../common/command/editCommand'
+import LineCommand from '../common/command/styleCommand'
+import StyleCommand from '../common/command/styleCommand'
 
 interface dataOption {
   tree:  Tree | null;
@@ -24,17 +30,18 @@ interface dataOption {
   drawGenerator: DrawGenerator | null;
   drawRender: DrawRender | null;
   callbacks: any;
+  command: CommandManager  | null;
 }
 
 export default function () {
-  const { handleOperate } = useOperate()
   let editTopic: EditTopic | null = null 
   const data: dataOption = reactive({
     tree:  null,
     paper:  null,
     drawGenerator: null,
     drawRender: null,
-    callbacks: {}
+    callbacks: {},
+    command: null
   })
 
   /**
@@ -52,9 +59,8 @@ export default function () {
     data.paper = new Paper('#paper');
     data.drawGenerator = new DrawGenerator(data.paper.getPaper());
     data.drawRender = new DrawRender(data.paper, {...options, tree: data.tree});
-    reDraw();
-    // 默认选中根节点
-    data.drawRender.changeCheckTopic(data.tree?.getRoot() as Node)
+    data.command = new CommandManager()
+    reDraw([data.tree?.getRoot().id]);
     editTopic = new EditTopic({
       wrapName: '.edit-wrap',
       inputName: '.edit-text'
@@ -67,14 +73,12 @@ export default function () {
    * @param newNodeId 
    * @param cb 
    */
-  function reDraw (newNodeId = '', cb?: any) {
+  function reDraw (checkNodeIds: string[] = [], cb?: any) {
     const position = new Position()
     const rootTree = (data.tree as Tree).getRoot()
     // 对节点重新计算位置
     position.getNodePosition(rootTree)
     data.paper?.clear()
-    // const { width, height } = data.paper?.getPaperAttr()
-    // data.drawRender?.drawParentRect(width, height)
     // 展开按钮的回调
     const callbackObj = {
       [DRAW_CALLBACK_TYPE.EXPAND]: function () {
@@ -86,26 +90,71 @@ export default function () {
       ...cb
     }
     data.drawRender?.setRapSetList([])
-    data.tree && data.drawRender?.drawTopic(rootTree, newNodeId, callbackObj)
+    data.drawRender?.setCheckNodeList([])
+    data.tree && data.drawRender?.drawTopic(rootTree, checkNodeIds, callbackObj)
+    changeIconDisabled(data.drawRender?.checkNodeList as Node[], operateList)
   }
 
+  // 获取操作的逻辑
+  const getOperateFunc = (type: operateType, extraVal: number) => {
+    const checkNodes = data.drawRender?.checkNodeList as Node[]
+    const checkNode = checkNodes[0]
+    const func = [
+      () => { // 添加同级节点
+        const newNode = data.tree?.createNode(getChildNodeData(type, checkNode)) as Node;
+        const addCommand = new AddCommand(newNode, checkNode, type)
+        addCommand.execute()
+        data.command?.pushCommand(addCommand)
+        reDraw([newNode.id])
+      },
+      () => { // 添加子级节点
+        const newNode = data.tree?.createNode(getChildNodeData(type, checkNode)) as Node;
+        const addCommand = new AddCommand(newNode, checkNode, type)
+        addCommand.execute()
+        data.command?.pushCommand(addCommand)
+        reDraw([newNode.id])
+      },
+      () => { // 编辑操作
+        const editCommand = new EditCommand(checkNode, editTopic as EditTopic)
+        editCommand.execute()
+        data.command?.pushCommand(editCommand)
+      },
+      async () => { // 图片操作
+        const imgCommand = new ImgCommand(checkNode, extraVal)
+        await imgCommand.execute()
+        data.command?.pushCommand(imgCommand)
+        reDraw([])
+      },
+      () => { // 删除节点
+        const delCommand = new DelCommand(checkNodes)
+        delCommand.execute()
+        data.command?.pushCommand(delCommand)
+        reDraw(checkNodes.map(item => item.id))
+      },
+      () => saveData(), // 保存数据
+      () => { // 撤销
+        const curCommand = data.command?.getExectedCommands()
+        data.command?.pushUndoCommand(curCommand)
+        curCommand.execute()
+        reDraw([curCommand?.node?.id] || [])
+      },
+      () => { // 恢复
+        const curCommand = data.command?.popCommand()
+        curCommand.undo()
+        reDraw(curCommand.lastCheckNodeIds || [])
+      }
+    ]
+    return func
+  }
 
   /**
    * 节点操作事件
    * @param type 
+   * @param extraVal 额外的值 
    */
-  function handleOperateFunc (type: operateType, crud: number) {
-    data.callbacks = {
-      [operateTotalType.ADD]: (node: Node) => {
-        reDraw(node.id)
-        data.drawRender?.changeCheckTopic(node)
-      },
-      [operateTotalType.EDIT]: () => editTopic?.editText(data.drawRender?.data.checkNodeList[0] as Node, data.drawRender?.ratio as number),
-      [operateTotalType.IMG]: (id: string) => reDraw(id),
-      [operateTotalType.DELETE]: () => reDraw(),
-      [operateTotalType.SAVE]: () => saveData()
-    }
-    handleOperate(data.drawRender?.data.checkNodeList as Array<Node>, {type, crud}, data.callbacks)
+  async function handleOperateFunc (type: operateType, extraVal: number) {
+    await getOperateFunc(type, extraVal)[type]()
+    changeSnapshotDisabled(data.command as CommandManager, operateList)
   }
   /**
    * 编辑框失焦事件
@@ -142,7 +191,7 @@ export default function () {
     }
     localStorage.setItem(dataKey, JSON.stringify(treeToFlat(data.tree?.getRoot())))
     localStorage.setItem(optionKey, JSON.stringify({
-      lineType: lineList.find(item => item.checked)?.value,
+      lineType: LINE_TYPE.value,
       nodeInfo: NodeInfo,
       LINE_COLOR: LINE_COLOR.value
     }))
@@ -159,7 +208,7 @@ export default function () {
       // 线条类型
       if (options.lineType) {
         changeLineType(lineList, JSON.parse(optionData).lineType)
-        data.drawRender?.setLineType(JSON.parse(optionData).lineType)
+        LINE_TYPE.value = JSON.parse(optionData).lineType
       }
       // 节点信息
       if (options.nodeInfo) {
@@ -173,10 +222,12 @@ export default function () {
     }
   }
 
-  function handleCommand (lineVal: number) {
-    changeLineType(lineList, lineVal)
-    data.drawRender?.setLineType(lineVal)
+  function handleCommand (style: {value: number, type: number, key: string}) {
+    const lineCommand = new StyleCommand(style)
+    lineCommand.execute()
+    data.command?.pushCommand(lineCommand)
     reDraw()
+    changeSnapshotDisabled(data.command as CommandManager, operateList)
   }
 
   return {

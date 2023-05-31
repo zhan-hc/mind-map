@@ -11,8 +11,10 @@ declare module '@vue/runtime-core' {
   export interface GlobalComponents {
     Color: typeof import('./src/components/color.vue')['default']
     Contact: typeof import('./src/components/contact.vue')['default']
+    ElDropdown: typeof import('element-plus/es')['ElDropdown']
     ElDropdownItem: typeof import('element-plus/es')['ElDropdownItem']
     ElDropdownMenu: typeof import('element-plus/es')['ElDropdownMenu']
+    ElTooltip: typeof import('element-plus/es')['ElTooltip']
     Operate: typeof import('./src/components/operate.vue')['default']
     Scale: typeof import('./src/components/scale.vue')['default']
   }

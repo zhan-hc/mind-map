@@ -6,14 +6,12 @@ import color from './components/color.vue'
 import contact from './components/contact.vue'
 import useDraw from './hooks/useDraw';
 import useScale from './hooks/useScale';
-import useColor from './hooks/useColor';
 import { lineList, operateList } from './constant/operate';
 import { Viewport } from './common/viewport'
 import { isMobile } from './utils/common';
 
   const { drawRender, initPaper, handleEditBlur, handleOperateFunc, handleCommand, reDraw } = useDraw()
   const { ratio, changeRatio } = useScale()
-  const { changeColor, changeLine } = useColor()
   const colorStatus = ref(false)
 
 
@@ -34,8 +32,8 @@ import { isMobile } from './utils/common';
 </script>
 
 <template>
-  <operate :operateList="operateList" :lineList="lineList" @handleOperate="handleOperateFunc" @handleCommand="handleCommand"></operate>
-  <color v-if="!isMobile && colorStatus" @changeColor="changeColor($event, reDraw)" @changeLine="changeLine($event, reDraw)"/>
+  <operate :operateList="operateList" :lineList="lineList" @handleOperate="handleOperateFunc"></operate>
+  <color v-if="!isMobile && colorStatus" :lineList="lineList" @handleCommand="handleCommand"/>
   <div id="paper" style="width:100vw;height:100vh;">
     <div class="edit-wrap">
       <div class="edit-text" contenteditable="true" @blur="handleEditBlur"></div>

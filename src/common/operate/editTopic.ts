@@ -39,7 +39,7 @@ class EditTopic {
     }
   }
 
-  public editText (checkNode: Node, ratio: number) {
+  public editText (checkNode: Node, ratio: number = 100) {
     if (!this.editWrap) return
     const { top, left } = checkNode.shape.node.getBoundingClientRect()
     this.editWrap.style.top = `${top + textPadding * (ratio / 100)}px`;

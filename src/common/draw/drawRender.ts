@@ -10,7 +10,7 @@ import { DRAW_CALLBACK_TYPE, ExtraOption, OPERATE_STATUS } from './type';
 import { Viewport } from '../viewport';
 import { insertAreaOption } from '../position';
 import { NodeLevel, NodeTypeId } from '../node/helper';
-import { CLICK_RECT_BORDER, DEFAULT_LINE_WIDTH, DRAG_PLACEHOLDER_LINE, DRAG_PLACEHOLDER_RECT, HOVER_RECT_BORDER, NONE_BORDER, LINE_COLOR } from '../../constant/attr';
+import { CLICK_RECT_BORDER, DEFAULT_LINE_WIDTH, DRAG_PLACEHOLDER_LINE, DRAG_PLACEHOLDER_RECT, HOVER_RECT_BORDER, NONE_BORDER, LINE_COLOR, LINE_TYPE } from '../../constant/attr';
 import EditTopic from '../operate/editTopic';
 import { Ref, reactive, ref } from 'vue';
 import Tree from '../tree';
@@ -30,7 +30,6 @@ export class DrawRender {
   public viewport: Viewport;
   public data: renderData;
   public tree: Tree | null | undefined; // 树节点
-  private lineType: number; // 连接线类型
   private editTopic: EditTopic | null; // 编辑
   private operateStatus: Ref<string>; // 操作状态
   private rapSetList: Array<RaphaelSet<"SVG" | "VML">>; // 每个节点的集合
@@ -44,7 +43,6 @@ export class DrawRender {
     this.ratio = option.ratio && option.ratio.value
     this.data = reactive({ checkNodeList: [] })
     this.rapSetList = []
-    this.lineType = 1
     this.viewport = new Viewport(paper, {
       ratio: option?.ratio || ref(0), 
       operateStatus: this.operateStatus, 
@@ -60,7 +58,7 @@ export class DrawRender {
   }
 
   // 绘制节点
-  public drawTopic (node:Node, checkNodeId: string, callback?: any) {
+  public drawTopic (node:Node, checkNodeIds: string[], callback?: any) {
     const st = this.paper.getPaper().set()
     // 矩形节点
     const rect = this.drawGenerator.drawRect(getNodeRectInfo(node, 5), getNodeRectAttr(node, 0) as RaphaelAttributes) // 底层节点
@@ -91,12 +89,10 @@ export class DrawRender {
       callback[node.id] = node
     }
     node.setShape(wrapRect)
-
     // 如果是新增节点则默认选中新节点
-    if (node.id === checkNodeId) {
+    if (checkNodeIds.length && checkNodeIds.includes(node.id)) {
       node.shape.attr(CLICK_RECT_BORDER)
-      this.data.checkNodeList = [node]
-      changeIconDisabled(this.data.checkNodeList, operateList)
+      this.data.checkNodeList.push(node)
     }
 
     if (node.children && node.children.length) {
@@ -105,8 +101,7 @@ export class DrawRender {
       nodeExpan.expandIconClick(callback)
       // 如果子节点展开
       if (node.expand) {
-        node.children.forEach((item: Node) => this.drawTopic(item, checkNodeId, callback))
-        
+        node.children.forEach((item: Node) => this.drawTopic(item, checkNodeIds, callback))
       }
     }
   }
@@ -185,7 +180,7 @@ export class DrawRender {
     const pNode = node.father
     if (!pNode) return
     let linePath = '';
-    const cline = new ConnectLine(this.lineType)
+    const cline = new ConnectLine(LINE_TYPE.value)
     // 是否是第一层节点，即与root连接的节点
     const firstLevel = getNodeLevel(node) === NodeLevel.second
     // 绘制当前节点的链接线
@@ -200,6 +195,10 @@ export class DrawRender {
     return line
   }
 
+  public get checkNodeList () {
+    return this.data.checkNodeList
+  }
+
   public getPaperElement (container: string | Element) : HTMLElement {
     const containerDom = (typeof container === 'string' ? document.querySelector(container) : container) as HTMLElement
     if (!containerDom) {
@@ -209,11 +208,6 @@ export class DrawRender {
       throw new Error('The width or height of Container is not more than 0')
     }
     return containerDom
-  }
-
-
-  public setLineType (type: number) {
-    this.lineType = type
   }
 
   public setEditTopic (edit: EditTopic) {
@@ -321,7 +315,7 @@ export class DrawRender {
   // 清空点击状态
   public clearClickStatus () {
     this.data.checkNodeList.forEach(item => item.shape.attr(NONE_BORDER));
-    changeIconDisabled(null, operateList);
+    changeIconDisabled([], operateList);
     this.editTopic?.blurInput()
   }
 }

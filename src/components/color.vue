@@ -1,12 +1,19 @@
 <script setup lang="ts">
-import { onMounted, reactive, ref, watchEffect } from 'vue';
+import { computed, reactive, ref } from 'vue';
 import { ElColorPicker } from 'element-plus'
 import { NodeLevel } from '../common/node/helper';
 import { NodeInfo } from '../common/node/helper';
 import {predefineColors} from '../constant/color'
+import { lineOption, styleType } from '../constant/operate';
 
+const props = defineProps({
+  lineList: {
+    type: Array<lineOption>,
+    default: () => []
+  }
+})
 
-const emit = defineEmits(['changeColor', 'changeLine'])
+const emit = defineEmits(['changeColor', 'handleCommand'])
 
 const topicList = reactive([
   {
@@ -33,12 +40,17 @@ const topicList = reactive([
 ])
 
 const LINE_COLOR = ref('#000000')
+const checkLine = computed(() => props.lineList.find(item => item.checked))
 const changeColor = (color:string | null, level:string, colorKey:string) => {
-  emit('changeColor', { color, level, colorKey })
+  emit('handleCommand', { type: level, value: color, key: colorKey })
 }
 
 const changeLine = (color:string | null) => {
-  emit('changeLine', color)
+  emit('handleCommand', { type: styleType.lineColor, value: color, key: '' })
+}
+
+function handleCommand ( value: number, type: number, key: string = '') {
+  emit('handleCommand', { value, type, key })
 }
 </script>
 
@@ -60,6 +72,24 @@ const changeLine = (color:string | null) => {
     <div class="line">
       <div class="line-label">连接线</div>
       <div class="line-color"><el-color-picker v-model="LINE_COLOR" show-alpha :predefine="predefineColors" @change="changeLine($event)"/></div>
+      <div class="line-type">
+        <el-dropdown>
+          <div class="line-item" :class="checkLine?.icon"></div>
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item v-for="(item, i) in lineList" :key="i">
+                <el-tooltip
+                  effect="dark"
+                  :content="item.desc"
+                  placement="right"
+                >
+                  <div class="line-item" :class="[item.icon, item.checked ? 'checked' : '']" @click="handleCommand(item.value, styleType.line)"></div>
+                </el-tooltip>
+              </el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
+      </div>
     </div>
   </div>
 </template>
@@ -114,5 +144,25 @@ const changeLine = (color:string | null) => {
 .line-label {
   width: 80px;
   margin-right: 8px;
+}
+
+.line-type {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 32px;
+  height: 32px;
+  margin-left: 20px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.line-item {
+  position: relative;
+  width: 20px;
+  height: 20px;
+  color: #000;
 }
 </style>

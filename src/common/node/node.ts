@@ -84,9 +84,13 @@ class Node {
   }
 
   public insertAfterChild(relativeChild: Node, child: Node): void {
-    const relativeIndex = this.children.findIndex((itemChild) => itemChild.id === relativeChild.id);
-    if (relativeIndex > -1) {
+    const relativeIndex = relativeChild && this.children.findIndex((itemChild) => itemChild.id === relativeChild.id);
+    if (!relativeChild) {
+      this.children.unshift(child);
+    } else if (relativeIndex > -1) {
       this.children.splice(relativeIndex + 1, 0, child);
+    } else {
+      this.pushChild(child)
     }
   }
 
@@ -140,11 +144,6 @@ class Node {
   public setImageData (imageData: ImageData | undefined) {
     this._imageData = imageData
   }
-}
-
-
-export function createNode (data: NodeOptions): Node {
-  return new Node(data)
 }
 
 export function getInitData () {
