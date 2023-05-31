@@ -1,5 +1,6 @@
 import { operateTotalType, operateType } from "../../constant/operate";
 import Node from "../node/node";
+import { Command } from "./type";
 
 export default class AddCommand implements Command{
   public type: string;

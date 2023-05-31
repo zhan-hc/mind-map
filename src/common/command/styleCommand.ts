@@ -2,6 +2,7 @@ import { LINE_COLOR, LINE_TYPE } from "../../constant/attr";
 import { lineList, operateTotalType, styleType } from "../../constant/operate";
 import { changeLineType } from "../../utils/common";
 import { NodeInfo } from "../node/helper";
+import { Command } from "./type";
 
 export default class StyleCommand implements Command{
   public type: string;

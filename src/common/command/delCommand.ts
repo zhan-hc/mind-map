@@ -1,5 +1,6 @@
 import { operateTotalType } from "../../constant/operate";
 import Node from "../node/node";
+import { Command } from "./type";
 
 export default class DelCommand implements Command{
   public type: string;

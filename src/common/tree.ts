@@ -1,4 +1,4 @@
-import Node, { NodeOptions, createNode } from './node/node'
+import Node, { NodeOptions } from './node/node'
 import Position from './position';
 export class Tree {
   private root: Node;

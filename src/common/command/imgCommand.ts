@@ -1,10 +1,11 @@
 import { textPadding } from "../../constant";
-import { imgType, operateTotalType, operateType } from "../../constant/operate";
+import { imgType, operateTotalType } from "../../constant/operate";
 import { getTextWidth } from "../../utils/common";
 import { getNodeLevel } from "../../utils/nodeUtils";
 import { NodeInfo } from "../node/helper";
 import Node, { ImageData } from "../node/node";
 import AddImage from "../operate/addImage";
+import { Command } from "./type";
 
 export default class ImgCommand implements Command{
   public type: string;
