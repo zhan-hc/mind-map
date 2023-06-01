@@ -125,7 +125,6 @@ export class DrawRender {
         useThrottleFn(dragMoveHandler, 100),
         function onstart (x,y,e) {
           that.editTopic?.blurInput()
-          that.changeCheckTopic(node)
         },
         function onend (e) {
           that.setOperateStatus(OPERATE_STATUS.NULL)
@@ -184,11 +183,7 @@ export class DrawRender {
     // 是否是第一层节点，即与root连接的节点
     const firstLevel = getNodeLevel(node) === NodeLevel.second
     // 绘制当前节点的链接线
-    if (firstLevel) {
-      linePath = cline.getLinePath(firstLevel, pNode, node)
-    } else {
-      linePath = cline.getLinePath(firstLevel, pNode, node)
-    }
+    linePath = cline.getLinePath(firstLevel, pNode, node)
     const drawAttr = attr ?? DEFAULT_LINE_WIDTH as RaphaelAttributes
     const line = this.drawGenerator.drawLine(linePath, drawAttr)
     line.toBack()
@@ -260,6 +255,7 @@ export class DrawRender {
           that.topicClickEvent(e, node)
         }
       } else {
+        that.clearClickStatus()
         that.setCheckNodeList([])
       }
     })
@@ -282,7 +278,6 @@ export class DrawRender {
 
   // 移动至可视区域
   public moveViewArea (node: SVGRectElement | Element) {
-    this.clearClickStatus()
     const {width, height} = this.paper.getPaper()
     // // 当元素被遮挡时，让其完全出现可视区域
     let { top, left, right, bottom } = node.getBoundingClientRect()

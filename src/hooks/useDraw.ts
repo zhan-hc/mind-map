@@ -2,7 +2,7 @@ import { reactive, toRefs } from 'vue'
 import DrawGenerator from "../common/draw/drawGenerator"
 import { DrawRender } from "../common/draw/drawRender"
 import { Paper } from "../common/paper"
-import Position from "../common/position"
+import Position, { insertAreaOption } from "../common/position"
 import Tree from "../common/tree"
 import { DRAW_CALLBACK_TYPE, ExtraOption } from '../common/draw/type'
 import Node, { ImageData, getChildNodeData, getInitData } from '../common/node/node'
@@ -22,6 +22,7 @@ import DelCommand from '../common/command/delCommand'
 import ImgCommand from '../common/command/imgCommand'
 import EditCommand from '../common/command/editCommand'
 import StyleCommand from '../common/command/styleCommand'
+import DragCommand from '../common/command/dragCommand'
 
 interface dataOption {
   tree:  Tree | null;
@@ -78,8 +79,12 @@ export default function () {
       [DRAW_CALLBACK_TYPE.EXPAND]: function () {
         reDraw()
       },
-      [DRAW_CALLBACK_TYPE.DRAG]: function () {
-        reDraw()
+      [DRAW_CALLBACK_TYPE.DRAG]: function (node: Node, insertArea: insertAreaOption) {
+        const dragCommand = new DragCommand(node, insertArea)
+        dragCommand.execute()
+        data.command?.pushCommand(dragCommand)
+        changeSnapshotDisabled(data.command as CommandManager, operateList)
+        reDraw([node.id])
       },
       ...cb
     }
@@ -117,7 +122,7 @@ export default function () {
         const imgCommand = new ImgCommand(checkNode, extraVal)
         await imgCommand.execute()
         data.command?.pushCommand(imgCommand)
-        reDraw([])
+        reDraw([checkNode.id])
       },
       [operateType.delTopic]: () => { // 删除节点
         const delCommand = new DelCommand(checkNodes)

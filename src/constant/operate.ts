@@ -35,7 +35,8 @@ export enum operateTotalType {
   SAVE = 'save',
   STYLE = 'style',
   EXECUTE = 'execute',
-  UNDO = 'undo'
+  UNDO = 'undo',
+  DRAG = 'drag'
 }
 
 export interface operateOption {

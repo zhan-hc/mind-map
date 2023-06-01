@@ -58,22 +58,22 @@ function handleOperate (item: operateOption, crud: number = 1): void {
         <div class="operate-item" :class="[item.icon, item.disabled ? 'disabled' : '']"></div>
         <template #dropdown>
           <el-dropdown-menu>
-            <el-dropdown-item :command="item">
+            <el-dropdown-item :command="item" @click="handleOperate(item, imgType.add)">
               <el-tooltip
                 effect="dark"
                 content="添加图片"
                 placement="right"
               >
-              <img src="../assets/image/add_img.png" alt="" @click="handleOperate(item, imgType.add)">
+              <img src="../assets/image/add_img.png" alt="">
               </el-tooltip>
             </el-dropdown-item>
-            <el-dropdown-item :command="item">
+            <el-dropdown-item :command="item" @click="handleOperate(item, imgType.delete)">
               <el-tooltip
                 effect="dark"
                 content="删除图片"
                 placement="right"
               >
-              <img src="../assets/image/del_img.png" alt=""  @click="handleOperate(item, imgType.delete)">
+              <img src="../assets/image/del_img.png" alt="" >
               </el-tooltip>
             </el-dropdown-item>
           </el-dropdown-menu>

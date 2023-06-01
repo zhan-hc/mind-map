@@ -125,7 +125,6 @@ export class Viewport {
     this.mouseDown = true
     this.lastMouseLocation.x = !isMobile ? (e as MouseEvent).clientX : (e as TouchEvent).targetTouches[0].pageX;
     this.lastMouseLocation.y = !isMobile ? (e as MouseEvent).clientY : (e as TouchEvent).targetTouches[0].pageY;
-    this.callBacks['clearClickStatus']()
   }
 
   public onMouseMove (e: MouseEvent | TouchEvent) {

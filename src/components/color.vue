@@ -77,13 +77,13 @@ function handleCommand ( value: number, type: number, key: string = '') {
           <div class="line-item" :class="checkLine?.icon"></div>
           <template #dropdown>
             <el-dropdown-menu>
-              <el-dropdown-item v-for="(item, i) in lineList" :key="i">
+              <el-dropdown-item v-for="(item, i) in lineList" :key="i" @click="handleCommand(item.value, styleType.line)">
                 <el-tooltip
                   effect="dark"
                   :content="item.desc"
                   placement="right"
                 >
-                  <div class="line-item" :class="[item.icon, item.checked ? 'checked' : '']" @click="handleCommand(item.value, styleType.line)"></div>
+                  <div class="line-item" :class="[item.icon, item.checked ? 'checked' : '']"></div>
                 </el-tooltip>
               </el-dropdown-item>
             </el-dropdown-menu>

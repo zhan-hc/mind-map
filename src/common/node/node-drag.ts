@@ -52,25 +52,8 @@ export class NodeDrag {
       return
     }
     if (this.insertArea) {
-      // 删除该节点
-      node.father && node.father.removeChild(node)
-      // 对其父节点的子节点sort重新设值
-      node.father && node.father.sortChild()
-      // 拖拽的节点更改父节点
-      this.insertArea?.father && node.setFather(this.insertArea.father)
-      // 拖拽的节点更改节点sort
-      this.insertArea?.father && node.setSort(this.insertArea?.insertIndex)
-      // 拖拽的节点更改属性
-      node.setAttr({
-        ...node.attr
-      })
-      // 给node的插入的父节点插入node
-      this.insertArea?.father.pushChild(node)
-      // 并重新排序
-      this.insertArea?.father.insertSortChild(node)
-      node.shape.attr(NONE_BORDER)
+      cb(node, this.insertArea)
       this.init()
-      cb()
     }
   }
 
