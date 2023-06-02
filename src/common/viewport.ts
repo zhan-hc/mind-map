@@ -157,7 +157,11 @@ export class Viewport {
       if (this._checkNodeList.length) {
         this._checkNodeList.forEach(item => item.shape.attr(NONE_BORDER))
       }
-      this._checkNodeList = this.callBacks['checkBoxEvent'](boxAttr)
+      const checkNodeList = this.callBacks['checkBoxEvent'](boxAttr)
+      if (!checkNodeList.length) {
+        this.callBacks['clearClickStatus']()
+      }
+      this._checkNodeList = checkNodeList
       this.callBacks['setCheckNodeList'](this._checkNodeList)
       this._checkNodeList.forEach(item => item.shape.attr(setNodeRectAttr( 2, '#3498db')))
       changeIconDisabled(this._checkNodeList, operateList)

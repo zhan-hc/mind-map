@@ -253,10 +253,8 @@ export class DrawRender {
           that.topicClickEvent(e, node)
         }
       } else {
-        if (that.editTopic?.editStatus) {
-          that.clearClickStatus()
-          that.setCheckNodeList([])
-        }
+        that.clearClickStatus()
+        that.setCheckNodeList([])
       }
     })
   }
