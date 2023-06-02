@@ -115,7 +115,7 @@ class Position {
     // 是否与拖拽节点同个父节点
     if (len) {
       // 计算出兄弟节点宽度最长的
-      const maxWidth = node.children.sort(function(a, b){return a.attr.width - b.attr.width})[0].attr.width
+      const maxWidth = Math.max.apply(null, node.children.map(item => item.attr.width))
       const startX = node.shape.getBBox().x2
       let startY = node.shape.getBBox().cy - 0.5 * nodeAreaHeight
       const endX = startX + moduleInterval + maxWidth

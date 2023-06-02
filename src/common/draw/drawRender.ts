@@ -86,9 +86,6 @@ export class DrawRender {
     const wrapRect = this.drawWrapRect(node, callback || null)
     st.push(wrapRect)
     this.rapSetList.push(st)
-    if (node.id === NodeTypeId.root) {
-      callback[node.id] = node
-    }
     node.setShape(wrapRect)
     // 如果是新增节点则默认选中新节点
     if (checkNodeIds.length && checkNodeIds.includes(node.id)) {
@@ -120,7 +117,7 @@ export class DrawRender {
       // 节流dragmove
       const dragMoveHandler = (x: number, y: number, cx: number, cy: number, event: MouseEvent) => {
         that.setOperateStatus(OPERATE_STATUS.DRAG)
-        nodeDrag.dragMove({cx, cy}, cb[NodeTypeId.root], node, that.drawDragRect.bind(that))
+        nodeDrag.dragMove({cx, cy}, that.tree?.getRoot() as Node, node, that.drawDragRect.bind(that))
       }
       wrapRect.drag(
         useThrottleFn(dragMoveHandler, 100),
