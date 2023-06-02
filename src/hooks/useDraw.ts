@@ -117,6 +117,7 @@ export default function () {
         const editCommand = new EditCommand(checkNode, editTopic as EditTopic)
         editCommand.execute()
         data.command?.pushCommand(editCommand)
+        data.drawRender?.setOperateStatus('edit')
       },
       [operateType.operateImg]: async () => { // 图片操作
         const imgCommand = new ImgCommand(checkNode, extraVal)

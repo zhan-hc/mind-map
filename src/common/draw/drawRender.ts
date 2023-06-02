@@ -53,6 +53,7 @@ export class DrawRender {
       }
     })
     this.drawTopic = this.drawTopic.bind(this)
+    this.setOperateStatus = this.setOperateStatus.bind(this)
     this.paperClick()
     
   }
@@ -255,8 +256,10 @@ export class DrawRender {
           that.topicClickEvent(e, node)
         }
       } else {
-        that.clearClickStatus()
-        that.setCheckNodeList([])
+        if (that.editTopic?.editStatus) {
+          that.clearClickStatus()
+          that.setCheckNodeList([])
+        }
       }
     })
   }
