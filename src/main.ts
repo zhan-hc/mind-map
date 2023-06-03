@@ -1,7 +1,15 @@
-import { createApp } from 'vue'
-import './style.css'
-import 'uno.css'
+import { createApp } from 'vue';
+import App from './App.vue';
+import './style.css';
+import 'uno.css';
 import "./utils/unocss-icon";
-import App from './App.vue'
-
-createApp(App).mount('#app')
+import 'element-plus/dist/index.css';
+import 'element-plus/theme-chalk/el-loading.css';
+import 'element-plus/theme-chalk/el-message.css';
+import 'element-plus/theme-chalk/el-tooltip.css';
+import 'element-plus/theme-chalk/el-dropdown.css';
+import 'element-plus/theme-chalk/el-dropdown-menu.css';
+import 'element-plus/theme-chalk/el-dropdown-item.css';
+import 'element-plus/theme-chalk/el-color-picker.css'
+const app = createApp(App);
+app.mount('#app');
