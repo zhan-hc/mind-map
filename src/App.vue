@@ -1,68 +1,61 @@
 <script setup lang="ts">
-import { reactive, watch } from 'vue';
-import { createNode } from './common/node'
-import { flatNodes } from './constant/'
-import { Tree, TreeOption } from './common/tree'
-import { Paper } from './common/paper';
-import position from './common/position'
-import { operateType, operateOption } from './utils/type'
-import { onMounted, watchEffect } from 'vue';
-import useOperate from './hooks/useOperate'
-import operate from './components/operate.vue'
-import Position from './common/position';
-import { NodeType } from './common/node/helper';
-import { iconList } from './constant'
+import { onMounted, ref } from 'vue';
+import operate from './components/operate.vue';
+import scale from './components/scale.vue';
+import color from './components/color.vue'
+import contact from './components/contact.vue'
+import useDraw from './hooks/useDraw';
+import useScale from './hooks/useScale';
+import { lineList, operateList } from './constant/operate';
+import { Viewport } from './common/viewport'
+import { isMobile } from './utils/common';
 
-  let tree: Tree | null = null
-  let paper: Paper | null = null
-  let show = false
+  const { drawRender, initPaper, handleEditBlur, handleOperateFunc, handleCommand, reDraw } = useDraw()
+  const { ratio, changeRatio } = useScale()
+  const colorStatus = ref(false)
 
-  function initPaper () {
-    tree = new Tree(flatNodes)
-    paper = new Paper('#paper')
-    reDraw()
-  }
 
-  function reDraw (newNodeId = '') {
-    paper?.clear()
-    const lineList = flatNodes.map(item => item.line) as string[]
-    paper?.drawLine(lineList)
-    tree && paper?.drawTopic(tree.treeNodes, newNodeId)
-    paper?.drawText(flatNodes)
-  }
-
-  function handleOperate (type: operateType) {
-    if ([operateType.addTopic, operateType.addSubTopic].includes(type)) {
-      const position = new Position()
-      const newNode = createNode(paper?.checkNode as TreeOption, type)
-      flatNodes.push(newNode)
-      // 重新对当前节点的sort属性排序
-      tree?.sortNodes(newNode)
-      // 对节点重新计算位置
-      position.getNodePosition(flatNodes[0])
-      tree?.convertToTree(flatNodes)
-      // 重绘
-      reDraw(newNode.id)
-      // // 默认选中新节点
-      // if (paper) {
-      //   paper.checkBorder = paper.drawNodeBorder(newNode)
-      //   paper.checkNode = newNode
-      // }
-    }
-    
+  // 缩放
+  function handleZoomFunc (type: 0|1) {
+    changeRatio(type, drawRender.value?.viewport as Viewport)
   }
 
   onMounted(() => {
-    initPaper()
+    initPaper({
+      ratio
+    })
+    // 父组件数据初始化完之后再渲染color组件，否则会因为渲染顺序问题导致color显示的是默认数据
+    colorStatus.value = true
   })
 
 
 </script>
 
 <template>
-  <operate @operate="handleOperate" :iconList="iconList"/>
-  <div id="paper" style="width:100vh;height:100vh;"></div>
+  <operate :operateList="operateList" :lineList="lineList" @handleOperate="handleOperateFunc"></operate>
+  <color v-if="!isMobile && colorStatus" :lineList="lineList" @handleCommand="handleCommand"/>
+  <div id="paper" style="width:100vw;height:100vh;">
+    <div class="edit-wrap">
+      <div class="edit-text" contenteditable="true" @blur="handleEditBlur"></div>
+    </div>
+  </div>
+  <scale :ratio="ratio" @handleZoom="handleZoomFunc"></scale>
+  <contact  v-if="!isMobile" />
 </template>
 
 <style scoped>
+.edit-wrap {
+  z-index: 999;
+  display: none;
+  position: absolute;
+  top: 1500px;
+  left: 100px;
+  max-width: 200px;
+  background-color: #fff;
+}
+.edit-text {
+  padding: 5px 10px;
+  font-size: 16px;
+  background-color: #fff;
+}
 </style>
