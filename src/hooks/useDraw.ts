@@ -175,30 +175,35 @@ export default function () {
       }
     })
     if (haveImgNodes.length) {
-      const res:any[] = await Promise.all(haveImgNodes.map(item => {
-        let data = new FormData();
-        data.append('file',item?.imageData?.file || '');
-        data.append('permission','1');
-        data.append('strategy_id','0');
-        data.append('album_id','0');
-        return uploadImage(data)
-      }))
-      haveImgNodes.forEach((item, i) => {
-        const imgData = {
-          ...item.imageData,
-          url: res[i].data.links.url
-        } as ImageData
-        item.setImageData(imgData)
-      })
+      try {
+        const res:any[] = await Promise.all(haveImgNodes.map(item => {
+          let data = new FormData();
+          data.append('file',item?.imageData?.file || '');
+          data.append('permission','1');
+          data.append('strategy_id','0');
+          data.append('album_id','0');
+          return uploadImage(data)
+        }))
+        haveImgNodes.forEach((item, i) => {
+          const imgData = {
+            ...item.imageData,
+            url: res[i]?.data?.links?.url || item.imageData?.url
+          } as ImageData
+          item.setImageData(imgData)
+        })
+        localStorage.setItem(dataKey, JSON.stringify(treeToFlat(data.tree?.getRoot())))
+        localStorage.setItem(optionKey, JSON.stringify({
+          lineType: LINE_TYPE.value,
+          nodeInfo: NodeInfo,
+          LINE_COLOR: LINE_COLOR.value
+        }))
+        hideLoading()
+        ElMessage.success({ message: '保存数据成功' })
+      } catch(err) {
+        hideLoading()
+        // ElMessage.error({ message: '上传图床接口异常' })
+      }
     }
-    localStorage.setItem(dataKey, JSON.stringify(treeToFlat(data.tree?.getRoot())))
-    localStorage.setItem(optionKey, JSON.stringify({
-      lineType: LINE_TYPE.value,
-      nodeInfo: NodeInfo,
-      LINE_COLOR: LINE_COLOR.value
-    }))
-    hideLoading()
-    ElMessage.success({ message: '保存数据成功' })
   }
 
   // 初始化设置缓存配置信息
