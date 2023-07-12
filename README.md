@@ -1,21 +1,17 @@
-# Vue 3 + TypeScript + Vite
+# mid-map
+这是一个通过vue3 + ts + raphael SVG库实现的一个思维导图，目前支持如下功能
+![image.png](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/479f9a8d605b49828924ff9b46ad2150~tplv-k3u1fbpfcp-watermark.image?)
 
-This template should help get you started developing with Vue 3 and TypeScript in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+[思维导图体验](https://zhan-hc.github.io/mind-map/)
+[思维导图难点重点解析文章](https://juejin.cn/post/7240333779222609976)
 
-## Recommended IDE Setup
+### 快捷键的功能（后续完善）
+- ctrl + 滚轮可以放大
 
-- [VS Code](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur) + [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin).
+### 额外功能
+- 支持数据本地缓存
+- 图片myshare图床存储
+- 节点等样式动态配置
+- 操作撤回和恢复
 
-## Type Support For `.vue` Imports in TS
-
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin) to make the TypeScript language service aware of `.vue` types.
-
-If the standalone TypeScript plugin doesn't feel fast enough to you, Volar has also implemented a [Take Over Mode](https://github.com/johnsoncodehk/volar/discussions/471#discussioncomment-1361669) that is more performant. You can enable it by the following steps:
-
-1. Disable the built-in TypeScript Extension
-   1. Run `Extensions: Show Built-in Extensions` from VSCode's command palette
-   2. Find `TypeScript and JavaScript Language Features`, right click and select `Disable (Workspace)`
-2. Reload the VSCode window by running `Developer: Reload Window` from the command palette.
-
-待优化或bug问题
-// 拖拽移动节点未加入快照command
+如果喜欢或者感兴趣感谢给star，有问题也可以加我wechat一起沟通交流
